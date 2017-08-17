@@ -47,3 +47,17 @@ Number("100a")    // NaN
 Number("null")    // 0
 Number("undefined") // NaN
 ```
+
+## 检测数组
+
+```js
+// ECMAScript 3
+if (value instanceof Array) {
+
+}
+
+// ECMAScript 5 Better
+if (Array.isArray(value)) {
+
+}
+```
