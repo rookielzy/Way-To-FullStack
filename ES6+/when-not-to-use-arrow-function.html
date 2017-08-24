@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>When _not_ to use arrows =></title>
+</head>
+
+<body>
+    <style>
+        button {
+            font-size: 100px;
+        }
+
+        .on {
+            background: #ffc600;
+        }
+    </style>
+    <button id="pushy">Push Me</button>
+
+    <script>
+        // When you really need `this`
+        const button = document.querySelector('#pushy');
+        button.addEventListener('click', function () {
+            console.log(this);
+            this.classList.toggle('on');
+        });
+
+        // It will bind the Window Object
+        // The Event Method is not belong to button but to Window object
+        // button.addEventListener('click', () => {
+        //     console.log(this);
+        //     this.classList.toggle('on');
+        // });
+
+        // When you need a method to bind to an object
+        const person = {
+            points: 23,
+            score() {
+                console.log(this);
+                this.points++;
+            }
+        }
+
+        // the score Method will bind to Window Object
+        // Because the Arrow Function is belong Window Object
+        // const person = {
+        //     points: 23,
+        //     score: () => {
+        //         console.log(this);
+        //         this.points++;
+        //     }
+        // }
+
+        // When you need to add a prototype method
+        class Car {
+            constructor(make, colour) {
+                this.make = make;
+                this.colour = colour;
+            }
+        }
+
+        const beemer = new Car('bmw', 'blue');
+        const subie = new Car('Subaru', 'white');
+
+        Car.prototype.summarize = function () {
+            console.log(this);
+            return `This car is a ${this.make} in the colour ${this.colour}`;
+        };
+
+        // Still the same reason like above
+        // class Car {
+        //     constructor(make, colour) {
+        //         this.make = make;
+        //         this.colour = colour;
+        //     }
+        // }
+
+        // const beemer = new Car('bmw', 'blue');
+        // const subie = new Car('Subaru', 'white');
+
+        // Car.prototype.summarize = () => {
+        //     console.log(this);
+        //     return `This car is a ${this.make} in the colour ${this.colour}`;
+        // };
+
+        // When you need arguments object
+        const orderChildren = function () {
+            console.log(this);
+            const children = Array.from(arguments);
+            return children.map((child, i) => {
+                return `${child} was child #${i + 1}`;
+            })
+            console.log(arguments);
+        }
+
+        // Arrow Function No binding os arguments
+        // const orderChildren = () => {
+        //     console.log(this);
+        //     const children = Array.from(arguments);
+        //     return children.map((child, i) => {
+        //         return `${child} was child #${i + 1}`;
+        //     })
+        //     console.log(arguments);
+        // }
+
+    </script>
+</body>
+
+</html>
