@@ -1,0 +1,20 @@
+{
+  "name": "chat-app-using-mongodb-socket",
+  "version": "1.0.0",
+  "description": "A Chat App made by mongodb and socket.io",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "Node.js",
+    "MongoDB",
+    "Socket.io"
+  ],
+  "author": "rookielzy",
+  "license": "ISC",
+  "dependencies": {
+    "mongodb": "^2.2.31",
+    "socket.io": "^2.0.3"
+  }
+}
