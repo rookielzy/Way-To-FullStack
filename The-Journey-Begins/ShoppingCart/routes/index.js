@@ -33,6 +33,16 @@ router.post('/user/signup', passport.authenticate('local.signup', {
 
 router.get('/user/profile', function(req, res, next) {
   res.render('user/profile');
-})
+});
 
+router.get('/user/signin', function(req, res, next) {
+  var message = req.flash('error');
+  res.render('user/signin', {csrfToken: req.csrfToken(), message: message, hasErrors: message.length > 0});
+});
+
+router.post('/user/signin', passport.authenticate('local.signin', {
+  successRedirect: 'profile',
+  failureRedirect: 'signin',
+  failureFlash: true
+}))
 module.exports = router;
