@@ -21,3 +21,14 @@ In fact, this follows from a handy framework for developing a React app from scr
 5. Hard-code initial states 静态数据初始化
 6. Add inverse data flow  添加反向数据流
 7. Add server communication 添加服务器交互功能
+
+找出哪一些是`state`，然后考虑：
+1. 它是通过 props 从父级传来的吗？如果是，他可能不是 state。
+2. 它随着时间推移不变吗？如果是，它可能不是 state。
+3. 你能够根据组件中任何其他的 state 或 props 把它计算出来吗？如果是，它不是 state。
+
+对你应用的每一个`state`：
+1. 确定每一个需要这个 state 来渲染的组件。
+2. 找到一个公共所有者组件(一个在层级上高于所有其他需要这个 state 的组件的组件)
+3. 这个公共所有者组件或另一个层级更高的组件应该拥有这个 state。
+4. 如果你没有找到可以拥有这个 state 的组件，创建一个仅用来保存状态的组件并把它加入比这个公共所有者组件层级更高的地方。
