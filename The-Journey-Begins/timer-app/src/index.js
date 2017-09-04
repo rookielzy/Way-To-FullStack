@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import TimerDashboard from './App';
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<App />, document.getElementById('content'));
+ReactDOM.render(<TimerDashboard />, document.getElementById('content'));
 registerServiceWorker();
