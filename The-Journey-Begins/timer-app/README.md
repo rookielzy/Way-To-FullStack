@@ -32,3 +32,11 @@ In fact, this follows from a handy framework for developing a React app from scr
 2. 找到一个公共所有者组件(一个在层级上高于所有其他需要这个 state 的组件的组件)
 3. 这个公共所有者组件或另一个层级更高的组件应该拥有这个 state。
 4. 如果你没有找到可以拥有这个 state 的组件，创建一个仅用来保存状态的组件并把它加入比这个公共所有者组件层级更高的地方。
+
+TimerDashboard: isOpend EditableTimerList ToggleableTimerForm
+
+EditableTimerList: EditableTimer
+
+EditableTimer: editFormOpen TimerForm Timer
+
+TimerForm: Two input fields
