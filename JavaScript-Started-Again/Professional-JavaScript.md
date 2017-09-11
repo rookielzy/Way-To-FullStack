@@ -61,3 +61,100 @@ if (Array.isArray(value)) {
 
 }
 ```
+
+## Getter Setter
+Getters and Setters can protect data, or provide useful ways to set its value.
+
+The regular way to use `get` and `set`:
+```js
+var address = {
+    street: "No Street",
+    city: "No City",
+    state: "No Staate",
+
+    // Provides styled data all at once
+    get getAddress() {
+        return this.street + ", " + this.city + ", " + this.state;
+    }
+
+    // Allows the user to set 3 values with 1
+    set setAddress(theAddress) {
+        var parts = theAddress.toString().split(", ");
+        this.street = parts[0] || '';
+        this.city = parts[1] || '';
+        this.state = parts[2] || '';
+    }
+}
+
+// Use it
+address.getAddress;
+address.setAddress = "123 Main St, Pittsburgh, PA";
+```
+
+Constructor Getters and Setters:
+```js
+function Coordinates() {
+    this.latitude = 0.0;
+    this.longitude = 0.0;
+}
+
+// Define the getter with the prototype to assign it to with
+// the property name and the getter function
+Object.__defineGetter__.call(Coordinates.prototype, "getCoords", function() {
+    return "Lat: " + this.latitude + " Long: " + this.longitude;
+});
+
+// Define the setter with prototype to assign it to with
+// the propertype name and the setter function
+Object.__defineSetter__.call(Coordinates.prototype, "setCoords", function(coors) {
+    var parts = coors.toString().split(", ");
+    this.latitude = parts[0] || '';
+    this.longitude = parts[1] || '';
+});
+
+var testCoords = new Coordinates();
+
+testCoords.setCoords = "40.71, 74.00";
+```
+
+Getters and Setters with `defineProperty`
+```js
+function Point() {
+    this.xPos = 0;
+    this.yPos = 0;
+}
+
+// Use defineProperty to set getters and setters
+// Pass te prototype to attach to along with the property name
+// and define the functions to associate with get and set
+Object.defineProperty(Point.prototype, "pointPos", {
+    get: function() {
+        return "X: " + this.xPos + " Y: " + this.yPos;
+    },
+    set: function(thePoint) {
+        var parts = thePoint.toString().split(", ");
+        this.xPos = parts[0] || '';
+        this.yPos = parts[1] || '';
+    },
+});
+
+var aPoint = new Point();
+aPoint.pointPos = "100, 200";
+```
+
+ES5.1 Getters and Setters
+```js
+var Circle = function(radius) {
+    this._radius = radius;
+};
+
+Circle.prototype = {
+    set radius(radius) { this._radius = radius; },
+    get radius() { return this__radius; },
+    get area() { return Matn.PI * (this._radius * this._radius); },
+}
+
+var circ = new Circle(10);
+
+circ.radius = 15;
+```
