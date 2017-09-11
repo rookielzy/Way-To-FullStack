@@ -14,8 +14,8 @@
 > * Creating new elements via JS and insert them into the DOM
 > * Creating a mini reading list app
 
-## `getElementsByClassName()` `getElementsByTagName()` `querySelectorAll()` will return a `HTML collections` not Array
-In this case, we can not use something like `forEach()`, `map()` to loop the collections
+## `getElementsByClassName()` `getElementsByTagName()` will return a `HTML collections` not Array BUT `querySelectorAll()` return NodeList
+In this case, we can not use something like `forEach()`, `map()` to loop the collections, but `querySelectorAll()` can use both two methods.
 NOTE: If you get a element like `ul`, and you want to loop that, you should treat this `ul` as `HTML collections`. 
 
 ```js
@@ -62,3 +62,39 @@ console.log(clonedBanner);
 ```
 
 [More about Node Type]('https://developer.mozilla.org/zh-CN/docs/Web/API/Node/nodeType')
+
+## DOM Traversal (Parent / Child)
+`parentNode` and `parentElement` return the same value. NOTE: `parentElement` is the parent element of the current node. This is always a DOM `Element` object, or null. BUT, `parentNode` is the parent of the current node. The parent of an element is an `Element` node, a `Document` node, or a `DocumentFragment` node.
+
+`childNodes` includes the <b>Break Line</b> or <b>Space</b>.
+
+`children` returns a HTMLCollection
+
+```js
+const bookList = document.querySelector('#book-list');
+
+console.log(bookList.parentNode);
+console.log(bookList.parentElement);
+
+console.log(bookList.parentNode.parentNode.parentNode);
+console.log(bookList.parentElement.parentElement.parentElement);
+
+console.log(bookList.childElementCount);
+console.log(bookList.childNodes);
+console.log(bookList.children);
+```
+
+## DOM Tracersal (Sibling)
+`xxxSibling` returns node.
+
+`xxxElementSibling` returns Element Node.
+
+```js
+const bookList = document.querySelector('#book-list');
+
+console.log(bookList.nextSibling);
+console.log(bookList.nextElementSibling);
+
+console.log(bookList.previousSibling);
+console.log(bookList.previousElementSibling);
+```
