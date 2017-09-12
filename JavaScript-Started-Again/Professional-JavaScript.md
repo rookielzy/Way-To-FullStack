@@ -373,3 +373,41 @@ var rover = new Dog("Rover", "Paul");
 // Call the static Function
 var bowser = Animal.getAnimal();
 ```
+
+
+## Deep Copy and Shallow Copy
+[how-to-deep-clone]('https://stackoverflow.com/questions/4459928/how-to-deep-clone-in-javascript')
+
+Deep Copy
+```js
+
+// WAY ONE
+// var cloned = JSON.parse(JSON.stringify(objectToClone));
+var a = {
+    one: 1
+}
+var b = {
+    arr: [1,2,3]
+}
+var cloned1 = JSON.parse(JSON.stringify(a));
+console.log(cloned1.one === a.one)  // true
+cloned1.one = 2;
+console.log(a.one); // 1
+
+var cloned2 = JSON.parse(JSON.stringify(b));
+console.log(cloned2.arr === b.arr)  // false
+cloned2.arr.push(4);
+console.log(cloned2.arr);   // [1,2,3,4]
+console.log(b.arr); // [1,2,3]
+
+// WAY TWO
+function copy(o) {
+  var _out, v, _key;
+  _out = Array.isArray(o) ? [] : {};
+  for (_key in o) {
+    v = o[_key];
+    _out[_key] = (typeof v === "object") ? copy(v) : v;
+  }
+  return _out;
+}
+```
