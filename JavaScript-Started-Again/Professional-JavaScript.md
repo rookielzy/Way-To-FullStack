@@ -158,3 +158,218 @@ var circ = new Circle(10);
 
 circ.radius = 15;
 ```
+
+## Inheritance
+When we ask for a property if it isn't found in the main object
+then it is searched for in the prototype object. We are able
+to inherit methods and variables from any object in a
+chain of objects.
+
+```js
+function Animal() {
+    this.name = "Animal";
+
+    // toString is a function in the main Object that every
+    // object inherits from
+    this.toString = function() {
+        return "My name is : " + this.name;
+    };
+}
+
+function Canine() {
+    this.name = "Canine";
+}
+
+function Wolf() {
+    this.name = "Wolf";
+}
+
+// Overwrite the prototype for Canine and Wolf
+Canine.prototype = new Animal();
+Wolf.prototype = new Canine();
+
+// After you overwrite prototype its constructor points to the
+// main object object so you have to reset the constructor after
+Canine.prototype.constructor = Canine;
+Wolf.prototype.constructor = Wolf;
+
+var arcticWolf = new Wolf();
+
+// Wolf inherits toString from Animal
+arcticWolf.toString();
+arcticWolf instanceof Animal;   // true
+
+// Properties added to any object in the chain is inherited
+Animal.prototype.sound = "Grrrr";
+
+Animal.prototype.getSound = function() {
+    return this.name + " says " + this.sound;
+}
+
+Canine.prototype.sound = "Woof";
+Wolf.prototype.sound = "Grrrr Wooof";
+
+// More often then not it makes more sense to just inherit the
+// prototype to speed up the lookup process
+
+function Rodent() {
+    this.name = "Rodent";
+}
+
+function Rat() {
+    this.name = "Rat";
+}
+
+Rodent.prototype = new Animal();
+Rat.prototype = Rodent.prototype;
+Rodent.prototype.constructor = Rodent;
+Rad.prototype.constructor = Rad;
+
+var caneRat = new Rat();
+
+// Wolf inherits toString from Animal
+caneRat.toString();
+```
+
+Intermediate Function Inheritance
+```js
+function extend(Child, Parent) {
+    var Temp = function() {};
+
+    Temp.prototype = Parent.prototype;
+
+    Child.prototype = new Temp();
+
+    Child.prototype.constuctor = Child;
+}
+
+function Deer() {
+    this.name = "Deer";
+    this.sound = "Snort";
+}
+
+var elk = new Deer();
+
+elk.getSound();
+```
+
+Call Parent Methods
+```js
+function Vehicle(name) {
+    this.name = "Vehicle";
+}
+
+// Functions fro the parent object
+Vehicle.prototype = {
+    drive: function() {
+        return this.name + " drives forward";
+    },
+    stop: function() {
+        return this.name + " stops";
+    }
+}
+
+function Truck(name) {
+    this.name = name;
+}
+
+// Inherit from Vehicle
+Truck.prototype = new Vehicle();
+Truck.prototype.constructor = Truck;
+
+// Overwrite drive parent method
+Truck.prototype.drive = function() {
+    
+    // Call the parent method with apply so that the parent
+    // method can access the Trucks name value
+    var driveMsg = Vehicle.prototype.drive.apply(this);
+    return driveMsg += " through a field";
+}
+
+var jeep = new Truck("Jeep");
+jeep.drive();
+jeep.stop();
+```
+
+## ES6 OOP with JavaScript
+Method Notation in Object Property Definitions
+
+```js
+//ES5 Way
+var addStuff = {
+    sum: function(num1, num2) {
+        return num1 + num2;
+    }
+};
+
+// ES6 Way
+var addStuff = {
+    sum(num1, num2) {
+        return num1 + num2;
+    }
+}
+```
+
+### Classes In JavaScript
+
+```js
+// ES5
+var Point = function(xPos, yPos){
+  this.xPos = xPos;
+  this.yPos = yPos;
+};
+ 
+Point.prototype.getPos = function(){
+  return "X: " + this.xPos + " Y: " + this.yPos;
+};
+ 
+var point = new Point(100, 200);
+
+// ES6 Way
+class Point {
+    constructor(xPos, yPos) {
+        this.xPos = xPos;
+        this.yPos = yPos;
+    }
+
+    getPos() {
+        return "X: " + this.xPos + " Y: " + this.yPos;
+    }
+}
+
+var point = new Point(100, 200);
+
+// More OOP In JavaScript
+class Animal {
+    constructor(name) {
+        this.name = name;
+    }
+
+    toString() {
+        return "Animal is named " + this.name;
+    }
+
+    // We create static functions as well
+    static getAnimal() {
+        return new Animal("No Name");
+    }
+}
+
+class Dog extends Animal {
+    constructor(name, owner) {
+        // We can all the super class now
+        super(name);
+        this.owner = owner;
+    }
+
+    toString() {
+        // You can call super class methods as well
+        return super.toString() + this.name;
+    }
+}
+
+var rover = new Dog("Rover", "Paul");
+
+// Call the static Function
+var bowser = Animal.getAnimal();
+```
