@@ -1,5 +1,6 @@
-import {announce, log} from './notify'
+import {announce, log} from './notify';
+require('./main.css');
 
 console.log('Webpack');
-notify();
+announce();
 log();
