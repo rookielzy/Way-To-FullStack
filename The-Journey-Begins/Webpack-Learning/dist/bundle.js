@@ -65,58 +65,31 @@
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+/***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__notify__ = __webpack_require__(1);
 
-__webpack_require__(2);
 
-console.log('Webpack');
-Object(__WEBPACK_IMPORTED_MODULE_0__notify__["a" /* announce */])();
-Object(__WEBPACK_IMPORTED_MODULE_0__notify__["b" /* log */])();
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+__webpack_require__(1);
+
+var Form = function Form() {
+    _classCallCheck(this, Form);
+
+    alert("Babel Test");
+};
+
+var form = new Form();
 
 /***/ }),
 /* 1 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = announce;
-/* harmony export (immutable) */ __webpack_exports__["b"] = log;
-function announce() {
-    console.log('Hi');
-};
-
-function log() {
-    console.log('logging');
-};
-
-
-// With this, we can just use import this file by default
-// export default {
-//     announce: announce,
-//     log: log
-// }
-
-// Use it in main.js
-// import notification from './notify'
-// notification.log();
-// notification.announce();
-
-// Or we can just use like this
-// export default function() {
-//    some functions
-//}
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(3);
+var content = __webpack_require__(2);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -124,7 +97,7 @@ var transform;
 var options = {}
 options.transform = transform
 // add the styles to the DOM
-var update = __webpack_require__(5)(content, options);
+var update = __webpack_require__(4)(content, options);
 if(content.locals) module.exports = content.locals;
 // Hot Module Replacement
 if(false) {
@@ -141,10 +114,10 @@ if(false) {
 }
 
 /***/ }),
-/* 3 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(4)(undefined);
+exports = module.exports = __webpack_require__(3)(undefined);
 // imports
 
 
@@ -155,7 +128,7 @@ exports.push([module.i, "body {\r\n    background-color: skyblue;\r\n}", ""]);
 
 
 /***/ }),
-/* 4 */
+/* 3 */
 /***/ (function(module, exports) {
 
 /*
@@ -237,7 +210,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -283,7 +256,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(6);
+var	fixUrls = __webpack_require__(5);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -596,7 +569,7 @@ function updateLink (link, options, obj) {
 
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports) {
 
 

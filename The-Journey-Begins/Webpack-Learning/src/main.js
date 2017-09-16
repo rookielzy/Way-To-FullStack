@@ -1,6 +1,9 @@
-import {announce, log} from './notify';
 require('./main.css');
 
-console.log('Webpack');
-announce();
-log();
+class Form {
+    constructor() {
+        alert("Babel Test");
+    }
+}
+
+const form = new Form();
