@@ -1,4 +1,4 @@
-require('./main.css');
+require('./main.scss');
 
 class Form {
     constructor() {
