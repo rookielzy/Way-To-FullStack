@@ -1,5 +1,3 @@
-require('./main.scss');
-
 class Form {
     constructor() {
         alert("Babel Test");
