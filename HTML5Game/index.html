@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        #canvas {
+            border: 1px solid #000;
+        }
+    </style>
+    <title>Canvas</title>
+</head>
+<body>
+    <canvas id="canvas" width="500" height="500"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const HEIGHT = 500;
+        const WIDTH = 500;
+        const message = "Bouncing";
+        let timeWhenGameStarted = Date.now();
+        ctx.font = '30px Arial';    // Setting font
+
+        // 玩家只有一个，所以只需要一个变量
+        const player = {
+            x: 50,
+            y: 40,
+            spdX: 30,
+            spdY: 5,
+            name: 'P',
+            hp: 10,
+        };
+        // AI有多个，需要有容器来存储它
+        const enemyList = {};
+        // AI 属性
+        function Enemy(id, x, y, spdX, spdY) {
+            let enemy = {
+                x: x,
+                y: y,
+                spdX: spdX,
+                spdY: spdY,
+                name: 'E',
+                id: id,
+            };
+            enemyList[id] = enemy;
+        }
+
+        // 计算两个实例之间的距离
+        function getDisctanceBetweenEntity(entity1, entity2) {
+            let vx = entity1.x - entity2.x;
+            let vy = entity1.y - entity2.y;
+            return Math.sqrt(vx*vx + vy*vy);
+        }
+
+        // 测试两个实例之间位置是否够近
+        function testCollisionEntity(entity1, entity2) {
+            let distance = getDisctanceBetweenEntity(entity1, entity2);
+            return distance < 30;
+        }
+
+        // 玩家用鼠标移动来控制角色
+        document.onmousemove = function(mouse) {
+            let mouseX = mouse.clientX;
+            let mouseY = mouse.clientY;
+
+            player.x = mouseX;
+            player.y = mouseY;
+        }
+
+        // 更行实例位置
+        function updateEntityPosition(entity) {
+            entity.x += entity.spdX;
+            entity.y += entity.spdY;
+
+            if (entity.x < 0 || entity.x > WIDTH) {
+                entity.spdX = -entity.spdX;
+            }
+
+            if (entity.y < 0 || entity.y > HEIGHT) {
+                entity.spdY = -entity.spdY;
+            }
+        }
+
+        // 显示实例
+        function drawEntity(entity) {
+            ctx.fillText(entity.name, entity.x, entity.y);            
+        }
+
+        // 更新实例
+        function updateEntity(entity) {
+            updateEntityPosition(entity);
+            drawEntity(entity);
+        }
+
+        // 更新画布
+        function update() {
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+            for (let key in enemyList) {
+                updateEntity(enemyList[key]);
+
+                let isColliding = testCollisionEntity(player, enemyList[key]);
+                if (isColliding) {
+                    
+                    player.hp = player.hp - 1;
+                    if (player.hp <= 0) {
+                        let timeSurvived = Date.now() - timeWhenGameStarted;
+
+                        console.log('You lost! You survived for ' + timeSurvived + " ms.");
+                        timeWhenGameStarted = Date.now();
+                        player.hp = 10;
+                    }
+                }
+            }
+            drawEntity(player);
+            ctx.fillText(player.hp + " Hp", 0, 30);
+        }
+
+        Enemy('E1',150,350,10,15);
+        Enemy('E2',250,350,10,-15);
+        Enemy('E3',250,150,10,-8);
+
+        setInterval(update, 40);
+    </script>
+</body>
+</html>
