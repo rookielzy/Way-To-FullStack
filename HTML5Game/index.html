@@ -36,6 +36,7 @@
             width: 20,
             height: 20,
             color: 'green',
+            atkSpd: 1,
         };
         // AI有多个，需要有容器来存储它
         let enemyList = {};
@@ -58,7 +59,7 @@
         }
 
         // 奖励
-        function Upgrade(id, x, y, spdX, spdY, width, height) {
+        function Upgrade(id, x, y, spdX, spdY, width, height, category, color) {
             let upgrade = {
                 x: x,
                 y: y,
@@ -68,7 +69,8 @@
                 id: id,
                 width: width,
                 height: height,
-                color: 'orange',
+                color: color,
+                category: category,
             };
             upgradeList[id] = upgrade;
         }
@@ -85,6 +87,7 @@
                 width: width,
                 height: height,
                 color: 'black',
+                timer: 0,
             };
             bulletList[id] = bullet;
         }
@@ -190,7 +193,17 @@
             let id = Math.random();
             let spdX = 0;
             let spdY = 0;
-            Upgrade(id, x, y, spdX, spdY, width, height);
+            let category;
+            let color;
+            if (Math.random() < 0.5) {
+                category = 'score';
+                color = 'orange';
+            } else {
+                category = 'atkSpd';
+                color = 'purple';
+            }
+            console.log(category, color);
+            Upgrade(id, x, y, spdX, spdY, width, height, category, color);
         }
 
         // 随机生成子弹
@@ -214,6 +227,7 @@
             frameCount = 0;
             enemyList = {};
             upgradeList = {};
+            bulletList = {};
             randomlyGenerateEnemy();
             randomlyGenerateEnemy();
             randomlyGenerateEnemy();
@@ -236,19 +250,42 @@
             }
 
             // 每1秒生成一个子弹
-            if (frameCount % 25 === 0) {
+            if (frameCount % Math.round(25 / player.atkSpd) === 0) {
                 randomlyGenerateBullet();
             }
 
             for (let key in bulletList) {
                 updateEntity(bulletList[key]);
+
+                let toRemove = false;
+                bulletList[key].timer++;
+                if (bulletList[key].timer > 100) {
+                    toRemove = true;
+                }
+                for (let key2 in enemyList) {
+                    let isColliding = testCollisionEntity(bulletList[key], enemyList[key2]);
+                    
+                    if (isColliding) {
+                        toRemove = true;
+                        delete enemyList[key2];
+                        break;
+                    }
+                }
+                if (toRemove) {
+                    delete bulletList[key];
+                }
             }
 
             for (let key in upgradeList) {
                 updateEntity(upgradeList[key]);
                 let isColliding = testCollisionEntity(player, upgradeList[key]);
                 if (isColliding) {
-                    score += 100;
+                    if (upgradeList[key].category === 'score') {
+                        score += 100;
+                    }
+                    if (upgradeList[key].category === 'atkSpd') {
+                        player.atkSpd += 3;
+                    }
                     delete upgradeList[key];
                 }
             }
