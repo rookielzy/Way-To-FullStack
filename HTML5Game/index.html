@@ -21,6 +21,7 @@
         const WIDTH = 500;
         const message = "Bouncing";
         let timeWhenGameStarted = Date.now();
+        let frameCount = 0;
         ctx.font = '30px Arial';    // Setting font
 
         // 玩家只有一个，所以只需要一个变量
@@ -36,7 +37,7 @@
             color: 'green',
         };
         // AI有多个，需要有容器来存储它
-        const enemyList = {};
+        let enemyList = {};
         // AI 属性
         function Enemy(id, x, y, spdX, spdY, width, height) {
             let enemy = {
@@ -86,9 +87,21 @@
 
         // 玩家用鼠标移动来控制角色
         document.onmousemove = function(mouse) {
-            let mouseX = mouse.clientX;
-            let mouseY = mouse.clientY;
+            let mouseX = mouse.clientX - 8;
+            let mouseY = mouse.clientY - 8;
 
+            if (mouseX < player.width/2) {
+                mouseX = player.width/2;
+            }
+            if (mouseX > WIDTH - player.width/2) {
+                mouseX = WIDTH - player.width/2;
+            }
+            if (mouseY < player.height/2) {
+                mouseY = player.height/2;
+            }
+            if (mouseY > HEIGHT - player.height/2) {
+                mouseY = HEIGHT - player.height/2;
+            }
             player.x = mouseX;
             player.y = mouseY;
         }
@@ -121,33 +134,55 @@
             drawEntity(entity);
         }
 
+        // 随机生成AI
+        function randomlyGenerateEnemy() {
+            let x = Math.random() * WIDTH;
+            let y = Math.random() * HEIGHT;
+            let height = Math.random() * 30 + 10;
+            let width = Math.random() * 30 + 10;
+            let id = Math.random();
+            let spdX = Math.random() * 5 + 5;
+            let spdY = Math.random() * 5 + 5;
+            Enemy(id, x, y, spdX, spdY, width, height);
+        }
+
+        function startNewGame() {
+            timeWhenGameStarted = Date.now();
+            player.hp = 10;
+            frameCount = 0;
+            enemyList = {};
+            randomlyGenerateEnemy();
+            randomlyGenerateEnemy();
+            randomlyGenerateEnemy();
+        }
+
         // 更新画布
         function update() {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
+            frameCount++;
+
+            // 每4秒生成一个AI
+            if (frameCount % 100 === 0) {
+                randomlyGenerateEnemy();
+            }
 
             for (let key in enemyList) {
                 updateEntity(enemyList[key]);
-
                 let isColliding = testCollisionEntity(player, enemyList[key]);
+
                 if (isColliding) {
-                    
                     player.hp = player.hp - 1;
                     if (player.hp <= 0) {
                         let timeSurvived = Date.now() - timeWhenGameStarted;
-
                         console.log('You lost! You survived for ' + timeSurvived + " ms.");
-                        timeWhenGameStarted = Date.now();
-                        player.hp = 10;
+                        // 游戏重新开始
+                        startNewGame();
                     }
                 }
             }
             drawEntity(player);
             ctx.fillText(player.hp + " Hp", 0, 30);
         }
-
-        Enemy('E1',150,350,10,15, 30, 30);
-        Enemy('E2',250,350,10,-15, 20, 20);
-        Enemy('E3',250,150,10,-8, 40, 10);
 
         setInterval(update, 40);
     </script>
