@@ -37,6 +37,11 @@
             height: 20,
             color: 'green',
             atkSpd: 1,
+            attackCounter: 0,
+            pressingDown: false,
+            pressingLeft: false,
+            pressingRight: false,
+            pressingUp: false,
         };
         // AI有多个，需要有容器来存储它
         let enemyList = {};
@@ -46,6 +51,7 @@
         function Enemy(id, x, y, spdX, spdY, width, height) {
             let enemy = {
                 x: x,
+                y: y,
                 y: y,
                 spdX: spdX,
                 spdY: spdY,
@@ -123,25 +129,65 @@
                 && rect2.y <= rect1.y + rect1.height;
         }
 
-        // 玩家用鼠标移动来控制角色
-        document.onmousemove = function(mouse) {
-            let mouseX = mouse.clientX - 8;
-            let mouseY = mouse.clientY - 8;
+        // 玩家用鼠标点击来发射子弹 每秒发射一颗
+        document.onclick = function(mouse) {
+            if (player.attackCounter > 25) {
+                randomlyGenerateBullet();
+                player.attackCounter = 0;
+            }
+        }
 
-            if (mouseX < player.width/2) {
-                mouseX = player.width/2;
+        // 玩家用 WSAD 来控制角色
+        document.onkeydown = function(event) {
+            if (event.keyCode === 68) {
+                player.pressingRight = true;
+            } else if (event.keyCode === 83) {
+                player.pressingDown = true;
+            } else if (event.keyCode === 65) {
+                player.pressingLeft = true;
+            } else if (event.keyCode === 87) {
+                player.pressingUp = true;
             }
-            if (mouseX > WIDTH - player.width/2) {
-                mouseX = WIDTH - player.width/2;
+        }
+
+        document.onkeyup = function(event) {
+            if (event.keyCode === 68) {
+                player.pressingRight = false;
+            } else if (event.keyCode === 83) {
+                player.pressingDown = false;
+            } else if (event.keyCode === 65) {
+                player.pressingLeft = false;
+            } else if (event.keyCode === 87) {
+                player.pressingUp = false;
             }
-            if (mouseY < player.height/2) {
-                mouseY = player.height/2;
+        }
+
+        function updatePlayerPosition() {
+            if (player.pressingRight) {
+                player.x += 10;
             }
-            if (mouseY > HEIGHT - player.height/2) {
-                mouseY = HEIGHT - player.height/2;
+            if (player.pressingLeft) {
+                player.x -= 10;
             }
-            player.x = mouseX;
-            player.y = mouseY;
+            if (player.pressingDown) {
+                player.y += 10;
+            }
+            if (player.pressingUp) {
+                player.y -= 10;
+            }
+
+            if (player.x < player.width/2) {
+                player.x = player.width/2;
+            }
+            if (player.x > WIDTH - player.width/2) {
+                player.x = WIDTH - player.width/2;
+            }
+            if (player.y < player.height/2) {
+                player.y = player.height/2;
+            }
+            if (player.y > HEIGHT - player.height/2) {
+                player.y = HEIGHT - player.height/2;
+            }
         }
 
         // 更行实例位置
@@ -249,10 +295,8 @@
                 randomlyGenerateUpgrade();
             }
 
-            // 每1秒生成一个子弹
-            if (frameCount % Math.round(25 / player.atkSpd) === 0) {
-                randomlyGenerateBullet();
-            }
+            // 每40ms更新一次
+            player.attackCounter += player.atkSpd;
 
             for (let key in bulletList) {
                 updateEntity(bulletList[key]);
@@ -304,6 +348,7 @@
                     }
                 }
             }
+            updatePlayerPosition();
             drawEntity(player);
             ctx.fillText(player.hp + " Hp", 0, 30);
             ctx.fillText('Score:' + score, 200, 30);
