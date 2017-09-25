@@ -47,44 +47,17 @@
 
             // 更新实例位置
             self.updatePosition = function () {
-                if (self.type === 'player') {
-                    if (self.pressingRight) {
-                        self.x += 10;
-                    }
-                    if (self.pressingLeft) {
-                        self.x -= 10;
-                    }
-                    if (self.pressingDown) {
-                        self.y += 10;
-                    }
-                    if (self.pressingUp) {
-                        self.y -= 10;
-                    }
+                self.x += self.spdX;
+                self.y += self.spdY;
 
-                    if (self.x < self.width / 2) {
-                        self.x = self.width / 2;
-                    }
-                    if (self.x > WIDTH - self.width / 2) {
-                        self.x = WIDTH - self.width / 2;
-                    }
-                    if (self.y < self.height / 2) {
-                        self.y = self.height / 2;
-                    }
-                    if (self.y > HEIGHT - self.height / 2) {
-                        self.y = HEIGHT - self.height / 2;
-                    }
-                } else {
-                    self.x += self.spdX;
-                    self.y += self.spdY;
-
-                    if (self.x < 0 || self.x > WIDTH) {
-                        self.spdX = -self.spdX;
-                    }
-
-                    if (self.x < 0 || self.x > HEIGHT) {
-                        self.spdY = -self.spdY;
-                    }
+                if (self.x < 0 || self.x > WIDTH) {
+                    self.spdX = -self.spdX;
                 }
+
+                if (self.x < 0 || self.x > HEIGHT) {
+                    self.spdY = -self.spdY;
+                }
+                    
             };
 
             // 显示实例
@@ -97,8 +70,8 @@
 
             // 更新实例
             self.update = function () {
-                    self.updatePosition();
-                    self.draw();
+                self.updatePosition();
+                self.draw();
             };
 
                     // 计算两个实例之间的距离
@@ -128,30 +101,89 @@
             return self;
         };
 
-        // 生成玩家
-        function createPlayer() {
-            let self = Entity('player', 'myId', 50, 40, 30, 5, 20, 20, 'green');
+        // 添加玩家和AI的实例
+        Actor = function(type, id, x, y, spdX, spdY, width, height, color, hp, atkSpd) {
+            let self = Entity(type, id, x, y, spdX, spdY, width, height, color);
 
-            self.hp = 10;
-            self.atkSpd = 1;
+            self.hp = hp;
+            self.atkSpd = atkSpd;
             self.attackCounter = 0;
             self.aimAngle = 0;
+
+            // 类似子类继承超类，减少覆写的代码量
+            let super_update = self.update;
+            self.update = function() {
+                super_update();
+                self.attackCounter += self.atkSpd;
+            }
+
+            // 普通攻击
+            self.performAttack = function() {
+                if (self.attackCounter > 25) {
+                    self.attackCounter = 0;
+                    randomlyGenerateBullet(self);
+                }
+            };
+
+            // 大招
+            self.performSpecialAttack = function() {
+                if (self.attackCounter > 50) {
+                    self.attackCounter = 0;
+
+                    randomlyGenerateBullet(self, self.aimAngle - 5);
+                    randomlyGenerateBullet(self, self.aimAngle);
+                    randomlyGenerateBullet(self, self.aimAngle + 5);
+                }
+            };
+
+            return self;
+        }
+
+        // 生成玩家
+        Player = function() {
+            let self = Actor('player', 'myId', 50, 40, 30, 5, 20, 20, 'green', 10, 1);
+
             self.pressingDown = false;
             self.pressingUp = false;
             self.pressingLeft = false;
             self.pressingRight = false;
-            player = self;
-        }
-        createPlayer();
+
+            // 覆写玩家移动
+            self.updatePosition = function() {
+                if (self.pressingRight) {
+                        self.x += 10;
+                    }
+                    if (self.pressingLeft) {
+                        self.x -= 10;
+                    }
+                    if (self.pressingDown) {
+                        self.y += 10;
+                    }
+                    if (self.pressingUp) {
+                        self.y -= 10;
+                    }
+
+                    if (self.x < self.width / 2) {
+                        self.x = self.width / 2;
+                    }
+                    if (self.x > WIDTH - self.width / 2) {
+                        self.x = WIDTH - self.width / 2;
+                    }
+                    if (self.y < self.height / 2) {
+                        self.y = self.height / 2;
+                    }
+                    if (self.y > HEIGHT - self.height / 2) {
+                        self.y = HEIGHT - self.height / 2;
+                    }
+            };
+            
+            return self;
+        };
+        player = Player();
 
         // AI 属性
         function Enemy(id, x, y, spdX, spdY, width, height) {
-            let self = Entity('enemy', id, x, y, spdX, spdY, width, height, 'red');
-
-            self.hp = 10;
-            self.aimAngle = 0;
-            self.atkSpd = 1;
-            self.attackCounter = 0;
+            let self = Actor('enemy', id, x, y, spdX, spdY, width, height, 'red', 10, 1);
 
             enemyList[id] = self;
         }
@@ -192,34 +224,15 @@
             player.aimAngle = Math.atan2(mouseY, mouseX) / Math.PI * 180;          
         };
 
-        // 攻击每秒发射一颗
-        function performAttack(entity) {
-            if (entity.attackCounter > 25) {
-                entity.attackCounter = 0;                
-                randomlyGenerateBullet(entity);
-            }
-        };
-
         // 玩家用鼠标点击来发射子弹 
         document.onclick = function(mouse) {
-            performAttack(player);
+            player.performAttack();
         };
-
-        // 大招
-        function performSpecialAttack(entity) {
-            if (entity.attackCounter > 50) {
-                entity.attackCounter = 0;         
-
-                randomlyGenerateBullet(entity, entity.aimAngle - 5);
-                randomlyGenerateBullet(entity, entity.aimAngle);
-                randomlyGenerateBullet(entity, entity.aimAngle + 5);                
-            }
-        }
 
         document.oncontextmenu = function(event) {
             event.preventDefault();
             
-            performSpecialAttack(player);
+            player.performSpecialAttack();
         };
 
         // 玩家用 WSAD 来控制角色
@@ -284,8 +297,8 @@
 
         // 随机生成子弹
         function randomlyGenerateBullet(entity, overwriteAngle) {
-            let x = player.x;
-            let y = player.y;
+            let x = entity.x;
+            let y = entity.y;
             let height = 10;
             let width = 10;
             let id = Math.random();
@@ -329,9 +342,6 @@
                 randomlyGenerateUpgrade();
             }
 
-            // 每40ms更新一次
-            player.attackCounter += player.atkSpd;
-
             for (let key in bulletList) {
                 bulletList[key].update();
 
@@ -341,13 +351,13 @@
                     toRemove = true;
                 }
                 for (let key2 in enemyList) {
-                    let isColliding = bulletList[key].testCollision(enemyList[key2]);
+                    // let isColliding = bulletList[key].testCollision(enemyList[key2]);
                     
-                    if (isColliding) {
-                        toRemove = true;
-                        delete enemyList[key2];
-                        break;
-                    }
+                    // if (isColliding) {
+                    //     toRemove = true;
+                    //     delete enemyList[key2];
+                    //     break;
+                    // }
                 }
                 if (toRemove) {
                     delete bulletList[key];
@@ -370,6 +380,8 @@
 
             for (let key in enemyList) {
                 enemyList[key].update();
+                enemyList[key].performAttack();
+
                 let isColliding = player.testCollision(enemyList[key]);
 
                 if (isColliding) {
