@@ -23,113 +23,157 @@
         let timeWhenGameStarted = Date.now();
         let frameCount = 0;
         let score = 0;
+        // AI有多个，需要有容器来存储它
+        let enemyList = {};
+        let upgradeList = {};
+        let bulletList = {};
         ctx.font = '30px Arial';    // Setting font
 
         // 玩家只有一个，所以只需要一个变量
         let player;
 
-        // 生成玩家
-        function createPlayer() {
-            player = {
-                type:'player',
-                x:50,
-                y:40,
-                spdX:30,                
-                spdY:5,
-                width:20,
-                height:20,
-                color:'green',
-                hp:10,
-                atkSpd:1,
-                attackCounter:0,
-                aimAngle:0,
-                pressingDown:false,
-                pressingUp:false,
-                pressingLeft:false,
-                pressingRight:false,
-            };
-        }
-        createPlayer();
-        // AI有多个，需要有容器来存储它
-        let enemyList = {};
-        let upgradeList = {};
-        let bulletList = {};
-        // AI 属性
-        function Enemy(id, x, y, spdX, spdY, width, height) {
-            let enemy = {
-                type: 'enemy',
+        // 实例
+        function Entity(type, id, x, y, spdX, spdY, width, height, color) {
+            let self = {
+                type: type,
                 x: x,
                 y: y,
                 spdX: spdX,
                 spdY: spdY,
-                id: id,
-                width: width,
-                height: height,
-                color: 'red',
-                aimAngle: 0,
-                atkSpd: 1,
-                attackCounter: 0,
-            };
-            enemyList[id] = enemy;
-        }
-
-        // 奖励
-        function Upgrade(id, x, y, spdX, spdY, width, height, category, color) {
-            let upgrade = {
-                type: 'upgrade',
-                x: x,
-                y: y,
-                spdX: spdX,
-                spdY: spdY,
-                id: id,
                 width: width,
                 height: height,
                 color: color,
-                category: category,
             };
-            upgradeList[id] = upgrade;
+
+            // 更新实例位置
+            self.updatePosition = function () {
+                if (self.type === 'player') {
+                    if (self.pressingRight) {
+                        self.x += 10;
+                    }
+                    if (self.pressingLeft) {
+                        self.x -= 10;
+                    }
+                    if (self.pressingDown) {
+                        self.y += 10;
+                    }
+                    if (self.pressingUp) {
+                        self.y -= 10;
+                    }
+
+                    if (self.x < self.width / 2) {
+                        self.x = self.width / 2;
+                    }
+                    if (self.x > WIDTH - self.width / 2) {
+                        self.x = WIDTH - self.width / 2;
+                    }
+                    if (self.y < self.height / 2) {
+                        self.y = self.height / 2;
+                    }
+                    if (self.y > HEIGHT - self.height / 2) {
+                        self.y = HEIGHT - self.height / 2;
+                    }
+                } else {
+                    self.x += self.spdX;
+                    self.y += self.spdY;
+
+                    if (self.x < 0 || self.x > WIDTH) {
+                        self.spdX = -self.spdX;
+                    }
+
+                    if (self.x < 0 || self.x > HEIGHT) {
+                        self.spdY = -self.spdY;
+                    }
+                }
+            };
+
+            // 显示实例
+            self.draw = function() {
+                ctx.save();
+                ctx.fillStyle = self.color;
+                ctx.fillRect(self.x - self.width/2, self.y - self.height/2, self.width, self.height);      
+                ctx.restore();
+            };
+
+            // 更新实例
+            self.update = function () {
+                    self.updatePosition();
+                    self.draw();
+            };
+
+                    // 计算两个实例之间的距离
+            self.getDisctance = function(entity2) {
+                let vx = self.x - entity2.x;
+                let vy = self.y - entity2.y;
+                return Math.sqrt(vx*vx + vy*vy);
+            };
+            
+                    // 测试两个实例之间位置是否够近
+            self.testCollision = function(entity2) {
+                let rect1 = {
+                    x: self.x - self.width/2,
+                    y: self.y - self.height/2,
+                    width: self.width,
+                    height: self.height,
+                };
+                let rect2 = {
+                    x: entity2.x - entity2.width/2,
+                    y: entity2.y - entity2.height/2,
+                    width: entity2.width,
+                    height: entity2.height,
+                };
+                return testCollisionRectRect(rect1, rect2);
+            }
+
+            return self;
+        };
+
+        // 生成玩家
+        function createPlayer() {
+            let self = Entity('player', 'myId', 50, 40, 30, 5, 20, 20, 'green');
+
+            self.hp = 10;
+            self.atkSpd = 1;
+            self.attackCounter = 0;
+            self.aimAngle = 0;
+            self.pressingDown = false;
+            self.pressingUp = false;
+            self.pressingLeft = false;
+            self.pressingRight = false;
+            player = self;
+        }
+        createPlayer();
+
+        // AI 属性
+        function Enemy(id, x, y, spdX, spdY, width, height) {
+            let self = Entity('enemy', id, x, y, spdX, spdY, width, height, 'red');
+
+            self.hp = 10;
+            self.aimAngle = 0;
+            self.atkSpd = 1;
+            self.attackCounter = 0;
+
+            enemyList[id] = self;
+        }
+
+        // 奖励
+        function Upgrade(id, x, y, spdX, spdY, width, height, color, category) {
+            let self = Entity('upgrade', id, x, y, spdX, spdY, width, height, color);
+
+            self.category = category;
+            upgradeList[id] = self;
         }
 
         // 子弹
         function Bullet(id, x, y, spdX, spdY, width, height) {
-            let bullet = {
-                type: 'bullet',
-                x: x,
-                y: y,
-                spdX: spdX,
-                spdY: spdY,
-                id: id,
-                width: width,
-                height: height,
-                color: 'black',
-                timer: 0,
-            };
-            bulletList[id] = bullet;
+            let self = Entity('bullet', id, x, y, spdX, spdY, width, height, 'black');
+
+            self.timer = 0;
+
+            bulletList[id] = self;
         }
 
-        // 计算两个实例之间的距离
-        function getDisctanceBetweenEntity(entity1, entity2) {
-            let vx = entity1.x - entity2.x;
-            let vy = entity1.y - entity2.y;
-            return Math.sqrt(vx*vx + vy*vy);
-        }
 
-        // 测试两个实例之间位置是否够近
-        function testCollisionEntity(entity1, entity2) {
-            let rect1 = {
-                x: entity1.x - entity1.width/2,
-                y: entity1.y - entity1.height/2,
-                width: entity1.width,
-                height: entity1.height,
-            };
-            let rect2 = {
-                x: entity2.x - entity2.width/2,
-                y: entity2.y - entity2.height/2,
-                width: entity2.width,
-                height: entity2.height,
-            };
-            return testCollisionRectRect(rect1, rect2);
-        }
 
         function testCollisionRectRect(rect1, rect2) {
             return rect1.x <= rect2.x + rect2.width
@@ -146,7 +190,7 @@
             mouseY -= player.y;
 
             player.aimAngle = Math.atan2(mouseY, mouseX) / Math.PI * 180;          
-        }
+        };
 
         // 攻击每秒发射一颗
         function performAttack(entity) {
@@ -154,12 +198,12 @@
                 entity.attackCounter = 0;                
                 randomlyGenerateBullet(entity);
             }
-        }
+        };
 
         // 玩家用鼠标点击来发射子弹 
         document.onclick = function(mouse) {
             performAttack(player);
-        }
+        };
 
         // 大招
         function performSpecialAttack(entity) {
@@ -176,7 +220,7 @@
             event.preventDefault();
             
             performSpecialAttack(player);
-        }
+        };
 
         // 玩家用 WSAD 来控制角色
         document.onkeydown = function(event) {
@@ -189,7 +233,7 @@
             } else if (event.keyCode === 87) {
                 player.pressingUp = true;
             }
-        }
+        };
 
         document.onkeyup = function(event) {
             if (event.keyCode === 68) {
@@ -201,63 +245,7 @@
             } else if (event.keyCode === 87) {
                 player.pressingUp = false;
             }
-        }
-
-        // 更新实例位置
-        function updateEntityPosition(entity) {
-            if (entity.type === 'player') {
-                if (player.pressingRight) {
-                    player.x += 10;
-                }
-                if (player.pressingLeft) {
-                    player.x -= 10;
-                }
-                if (player.pressingDown) {
-                    player.y += 10;
-                }
-                if (player.pressingUp) {
-                    player.y -= 10;
-                }
-
-                if (player.x < player.width / 2) {
-                    player.x = player.width / 2;
-                }
-                if (player.x > WIDTH - player.width / 2) {
-                    player.x = WIDTH - player.width / 2;
-                }
-                if (player.y < player.height / 2) {
-                    player.y = player.height / 2;
-                }
-                if (player.y > HEIGHT - player.height / 2) {
-                    player.y = HEIGHT - player.height / 2;
-                }
-            } else {
-                entity.x += entity.spdX;
-                entity.y += entity.spdY;
-
-                if (entity.x < 0 || entity.x > WIDTH) {
-                    entity.spdX = -entity.spdX;
-                }
-
-                if (entity.x < 0 || entity.x > HEIGHT) {
-                    entity.spdY = -entity.spdY;
-                }
-            }
-        }
-
-        // 显示实例
-        function drawEntity(entity) {
-            ctx.save();
-            ctx.fillStyle = entity.color;
-            ctx.fillRect(entity.x - entity.width/2, entity.y - entity.height/2, entity.width, entity.height);      
-            ctx.restore();
-        }
-
-        // 更新实例
-        function updateEntity(entity) {
-            updateEntityPosition(entity);
-            drawEntity(entity);
-        }
+        };
 
         // 随机生成AI
         function randomlyGenerateEnemy() {
@@ -291,7 +279,7 @@
                 color = 'purple';
             }
 
-            Upgrade(id, x, y, spdX, spdY, width, height, category, color);
+            Upgrade(id, x, y, spdX, spdY, width, height, color, category);
         }
 
         // 随机生成子弹
@@ -345,7 +333,7 @@
             player.attackCounter += player.atkSpd;
 
             for (let key in bulletList) {
-                updateEntity(bulletList[key]);
+                bulletList[key].update();
 
                 let toRemove = false;
                 bulletList[key].timer++;
@@ -353,7 +341,7 @@
                     toRemove = true;
                 }
                 for (let key2 in enemyList) {
-                    let isColliding = testCollisionEntity(bulletList[key], enemyList[key2]);
+                    let isColliding = bulletList[key].testCollision(enemyList[key2]);
                     
                     if (isColliding) {
                         toRemove = true;
@@ -367,8 +355,8 @@
             }
 
             for (let key in upgradeList) {
-                updateEntity(upgradeList[key]);
-                let isColliding = testCollisionEntity(player, upgradeList[key]);
+                upgradeList[key].update();
+                let isColliding = player.testCollision(upgradeList[key]);
                 if (isColliding) {
                     if (upgradeList[key].category === 'score') {
                         score += 100;
@@ -381,8 +369,8 @@
             }
 
             for (let key in enemyList) {
-                updateEntity(enemyList[key]);
-                let isColliding = testCollisionEntity(player, enemyList[key]);
+                enemyList[key].update();
+                let isColliding = player.testCollision(enemyList[key]);
 
                 if (isColliding) {
                     player.hp = player.hp - 1;
@@ -396,7 +384,7 @@
                 startNewGame();
             }
 
-            updateEntity(player);
+            player.update();
             ctx.fillText(player.hp + " Hp", 0, 30);
             ctx.fillText('Score:' + score, 200, 30);
         }
