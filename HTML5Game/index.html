@@ -26,24 +26,30 @@
         ctx.font = '30px Arial';    // Setting font
 
         // 玩家只有一个，所以只需要一个变量
-        const player = {
-            x: 50,
-            y: 40,
-            spdX: 30,
-            spdY: 5,
-            name: 'P',
-            hp: 10,
-            width: 20,
-            height: 20,
-            color: 'green',
-            atkSpd: 1,
-            attackCounter: 0,
-            pressingDown: false,
-            pressingLeft: false,
-            pressingRight: false,
-            pressingUp: false,
-            aimAngle: 0,
-        };
+        let player;
+
+        // 生成玩家
+        function createPlayer() {
+            player = {
+                type:'player',
+                x:50,
+                y:40,
+                spdX:30,                
+                spdY:5,
+                width:20,
+                height:20,
+                color:'green',
+                hp:10,
+                atkSpd:1,
+                attackCounter:0,
+                aimAngle:0,
+                pressingDown:false,
+                pressingUp:false,
+                pressingLeft:false,
+                pressingRight:false,
+            };
+        }
+        createPlayer();
         // AI有多个，需要有容器来存储它
         let enemyList = {};
         let upgradeList = {};
@@ -51,17 +57,18 @@
         // AI 属性
         function Enemy(id, x, y, spdX, spdY, width, height) {
             let enemy = {
+                type: 'enemy',
                 x: x,
-                y: y,
                 y: y,
                 spdX: spdX,
                 spdY: spdY,
-                name: 'E',
                 id: id,
                 width: width,
                 height: height,
                 color: 'red',
                 aimAngle: 0,
+                atkSpd: 1,
+                attackCounter: 0,
             };
             enemyList[id] = enemy;
         }
@@ -69,11 +76,11 @@
         // 奖励
         function Upgrade(id, x, y, spdX, spdY, width, height, category, color) {
             let upgrade = {
+                type: 'upgrade',
                 x: x,
                 y: y,
                 spdX: spdX,
                 spdY: spdY,
-                name: 'E',
                 id: id,
                 width: width,
                 height: height,
@@ -86,11 +93,11 @@
         // 子弹
         function Bullet(id, x, y, spdX, spdY, width, height) {
             let bullet = {
+                type: 'bullet',
                 x: x,
                 y: y,
                 spdX: spdX,
                 spdY: spdY,
-                name: 'E',
                 id: id,
                 width: width,
                 height: height,
@@ -141,23 +148,34 @@
             player.aimAngle = Math.atan2(mouseY, mouseX) / Math.PI * 180;          
         }
 
-        // 玩家用鼠标点击来发射子弹 每秒发射一颗
+        // 攻击每秒发射一颗
+        function performAttack(entity) {
+            if (entity.attackCounter > 25) {
+                entity.attackCounter = 0;                
+                randomlyGenerateBullet(entity);
+            }
+        }
+
+        // 玩家用鼠标点击来发射子弹 
         document.onclick = function(mouse) {
-            if (player.attackCounter > 25) {
-                randomlyGenerateBullet(player);
-                player.attackCounter = 0;
+            performAttack(player);
+        }
+
+        // 大招
+        function performSpecialAttack(entity) {
+            if (entity.attackCounter > 50) {
+                entity.attackCounter = 0;         
+
+                randomlyGenerateBullet(entity, entity.aimAngle - 5);
+                randomlyGenerateBullet(entity, entity.aimAngle);
+                randomlyGenerateBullet(entity, entity.aimAngle + 5);                
             }
         }
 
         document.oncontextmenu = function(event) {
             event.preventDefault();
-            if (player.attackCounter > 50) {
-                for (let i = 0; i < 360; i++) {
-                    randomlyGenerateBullet(player, i);
-                }   
-
-                player.attackCounter = 0;            
-            }
+            
+            performSpecialAttack(player);
         }
 
         // 玩家用 WSAD 来控制角色
@@ -185,45 +203,45 @@
             }
         }
 
-        function updatePlayerPosition() {
-            if (player.pressingRight) {
-                player.x += 10;
-            }
-            if (player.pressingLeft) {
-                player.x -= 10;
-            }
-            if (player.pressingDown) {
-                player.y += 10;
-            }
-            if (player.pressingUp) {
-                player.y -= 10;
-            }
-
-            if (player.x < player.width/2) {
-                player.x = player.width/2;
-            }
-            if (player.x > WIDTH - player.width/2) {
-                player.x = WIDTH - player.width/2;
-            }
-            if (player.y < player.height/2) {
-                player.y = player.height/2;
-            }
-            if (player.y > HEIGHT - player.height/2) {
-                player.y = HEIGHT - player.height/2;
-            }
-        }
-
-        // 更行实例位置
+        // 更新实例位置
         function updateEntityPosition(entity) {
-            entity.x += entity.spdX;
-            entity.y += entity.spdY;
+            if (entity.type === 'player') {
+                if (player.pressingRight) {
+                    player.x += 10;
+                }
+                if (player.pressingLeft) {
+                    player.x -= 10;
+                }
+                if (player.pressingDown) {
+                    player.y += 10;
+                }
+                if (player.pressingUp) {
+                    player.y -= 10;
+                }
 
-            if (entity.x < 0 || entity.x > WIDTH) {
-                entity.spdX = -entity.spdX;
-            }
+                if (player.x < player.width / 2) {
+                    player.x = player.width / 2;
+                }
+                if (player.x > WIDTH - player.width / 2) {
+                    player.x = WIDTH - player.width / 2;
+                }
+                if (player.y < player.height / 2) {
+                    player.y = player.height / 2;
+                }
+                if (player.y > HEIGHT - player.height / 2) {
+                    player.y = HEIGHT - player.height / 2;
+                }
+            } else {
+                entity.x += entity.spdX;
+                entity.y += entity.spdY;
 
-            if (entity.y < 0 || entity.y > HEIGHT) {
-                entity.spdY = -entity.spdY;
+                if (entity.x < 0 || entity.x > WIDTH) {
+                    entity.spdX = -entity.spdX;
+                }
+
+                if (entity.x < 0 || entity.x > HEIGHT) {
+                    entity.spdY = -entity.spdY;
+                }
             }
         }
 
@@ -264,6 +282,7 @@
             let spdY = 0;
             let category;
             let color;
+
             if (Math.random() < 0.5) {
                 category = 'score';
                 color = 'orange';
@@ -271,17 +290,18 @@
                 category = 'atkSpd';
                 color = 'purple';
             }
-            console.log(category, color);
+
             Upgrade(id, x, y, spdX, spdY, width, height, category, color);
         }
 
         // 随机生成子弹
         function randomlyGenerateBullet(entity, overwriteAngle) {
-            let x = entity.x;
-            let y = entity.y;
+            let x = player.x;
+            let y = player.y;
             let height = 10;
             let width = 10;
             let id = Math.random();
+
             // 子弹发射角度随机，角度不能用 degree 来表示，应用 rad
             let angle = entity.aimAngle;
             if (overwriteAngle !== undefined) {
@@ -329,7 +349,7 @@
 
                 let toRemove = false;
                 bulletList[key].timer++;
-                if (bulletList[key].timer > 100) {
+                if (bulletList[key].timer > 75) {
                     toRemove = true;
                 }
                 for (let key2 in enemyList) {
@@ -366,20 +386,22 @@
 
                 if (isColliding) {
                     player.hp = player.hp - 1;
-                    if (player.hp <= 0) {
-                        let timeSurvived = Date.now() - timeWhenGameStarted;
-                        console.log('You lost! You survived for ' + timeSurvived + " ms.");
-                        // 游戏重新开始
-                        startNewGame();
-                    }
                 }
             }
-            updatePlayerPosition();
-            drawEntity(player);
+
+            if (player.hp <= 0) {
+                let timeSurvived = Date.now() - timeWhenGameStarted;
+                console.log('You lost! You survived for ' + timeSurvived + " ms.");
+                // 游戏重新开始
+                startNewGame();
+            }
+
+            updateEntity(player);
             ctx.fillText(player.hp + " Hp", 0, 30);
             ctx.fillText('Score:' + score, 200, 30);
         }
 
+        startNewGame();
         setInterval(update, 40);
     </script>
 </body>
