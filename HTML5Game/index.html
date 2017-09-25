@@ -42,6 +42,7 @@
             pressingLeft: false,
             pressingRight: false,
             pressingUp: false,
+            aimAngle: 0,
         };
         // AI有多个，需要有容器来存储它
         let enemyList = {};
@@ -60,6 +61,7 @@
                 width: width,
                 height: height,
                 color: 'red',
+                aimAngle: 0,
             };
             enemyList[id] = enemy;
         }
@@ -129,10 +131,20 @@
                 && rect2.y <= rect1.y + rect1.height;
         }
 
+        document.onmousemove = function (mouse) {
+            let mouseX = mouse.clientX - 8;
+            let mouseY = mouse.clientY - 8;
+
+            mouseX -= player.x;
+            mouseY -= player.y;
+
+            player.aimAngle = Math.atan2(mouseY, mouseX) / Math.PI * 180;          
+        }
+
         // 玩家用鼠标点击来发射子弹 每秒发射一颗
         document.onclick = function(mouse) {
             if (player.attackCounter > 25) {
-                randomlyGenerateBullet();
+                randomlyGenerateBullet(player);
                 player.attackCounter = 0;
             }
         }
@@ -253,14 +265,14 @@
         }
 
         // 随机生成子弹
-        function randomlyGenerateBullet() {
-            let x = player.x;
-            let y = player.y;
+        function randomlyGenerateBullet(entity) {
+            let x = entity.x;
+            let y = entity.y;
             let height = 10;
             let width = 10;
             let id = Math.random();
             // 子弹发射角度随机，角度不能用 degree 来表示，应用 rad
-            let angle = Math.random() * 360;
+            let angle = entity.aimAngle;
             let spdX = Math.cos(angle/180*Math.PI) * 5;
             let spdY = Math.sin(angle/180*Math.PI) * 5;
             Bullet(id, x, y, spdX, spdY, width, height);
