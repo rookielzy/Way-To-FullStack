@@ -36,6 +36,7 @@
         function Entity(type, id, x, y, spdX, spdY, width, height, color) {
             let self = {
                 type: type,
+                id: id,
                 x: x,
                 y: y,
                 spdX: spdX,
@@ -176,6 +177,17 @@
                         self.y = HEIGHT - self.height / 2;
                     }
             };
+
+            let super_update = self.update;
+            self.update = function() {
+                super_update();
+                if (player.hp <= 0) {
+                    let timeSurvived = Date.now() - timeWhenGameStarted;
+                    console.log('You lost! You survived for ' + timeSurvived + " ms.");
+                    // 游戏重新开始
+                    startNewGame();
+                }    
+            }
             
             return self;
         };
@@ -185,6 +197,17 @@
         function Enemy(id, x, y, spdX, spdY, width, height) {
             let self = Actor('enemy', id, x, y, spdX, spdY, width, height, 'red', 10, 1);
 
+            let super_update = self.update;
+            self.update = function() {
+                super_update();
+                self.performAttack();
+
+                let isColliding = player.testCollision(self);
+                if (isColliding) {
+                    player.hp = player.hp - 1;
+                }
+            }
+            
             enemyList[id] = self;
         }
 
@@ -193,6 +216,23 @@
             let self = Entity('upgrade', id, x, y, spdX, spdY, width, height, color);
 
             self.category = category;
+
+            let super_update = self.update;
+            self.update = function() {
+                super_update();
+                let isColliding = player.testCollision(self);
+                if (isColliding) {
+                    if (self.category === 'score') {
+                        score += 100;
+                    }
+                    if (self.category === 'atkSpd') {
+                        player.atkSpd += 3;
+                    }
+                    ids.push(self.id);
+                    delete upgradeList[self.id];                 
+                }
+            }
+
             upgradeList[id] = self;
         }
 
@@ -201,6 +241,28 @@
             let self = Entity('bullet', id, x, y, spdX, spdY, width, height, 'black');
 
             self.timer = 0;
+
+            let super_update = self.update;
+            self.update = function() {
+                super_update();
+                let toRemove = false;
+                self.timer++;
+                if (self.timer > 75) {
+                    toRemove = true;
+                }
+
+                for (let key in enemyList) {
+                    // let isColliding = self.testCollision(enemyList[key]);
+                    // if (isColliding) {
+                    //     toRemove = true;
+                    //     delete enemyList[key];
+                    //     break;
+                    // }
+                }
+                if (toRemove) {
+                    delete bulletList[self.id];
+                }
+            }
 
             bulletList[id] = self;
         }
@@ -291,7 +353,6 @@
                 category = 'atkSpd';
                 color = 'purple';
             }
-
             Upgrade(id, x, y, spdX, spdY, width, height, color, category);
         }
 
@@ -344,56 +405,14 @@
 
             for (let key in bulletList) {
                 bulletList[key].update();
-
-                let toRemove = false;
-                bulletList[key].timer++;
-                if (bulletList[key].timer > 75) {
-                    toRemove = true;
-                }
-                for (let key2 in enemyList) {
-                    // let isColliding = bulletList[key].testCollision(enemyList[key2]);
-                    
-                    // if (isColliding) {
-                    //     toRemove = true;
-                    //     delete enemyList[key2];
-                    //     break;
-                    // }
-                }
-                if (toRemove) {
-                    delete bulletList[key];
-                }
             }
 
             for (let key in upgradeList) {
                 upgradeList[key].update();
-                let isColliding = player.testCollision(upgradeList[key]);
-                if (isColliding) {
-                    if (upgradeList[key].category === 'score') {
-                        score += 100;
-                    }
-                    if (upgradeList[key].category === 'atkSpd') {
-                        player.atkSpd += 3;
-                    }
-                    delete upgradeList[key];
-                }
             }
 
             for (let key in enemyList) {
                 enemyList[key].update();
-                enemyList[key].performAttack();
-
-                let isColliding = player.testCollision(enemyList[key]);
-
-                if (isColliding) {
-                    player.hp = player.hp - 1;
-                }
-            }
-
-            if (player.hp <= 0) {
-                let timeSurvived = Date.now() - timeWhenGameStarted;
-                console.log('You lost! You survived for ' + timeSurvived + " ms.");
-                // 游戏重新开始
-                startNewGame();
             }
 
             player.update();
