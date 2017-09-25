@@ -13,260 +13,29 @@
 </head>
 <body>
     <canvas id="canvas" width="500" height="500"></canvas>
-
+    <script src="js/Entities.js"></script>
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const HEIGHT = 500;
         const WIDTH = 500;
-        const message = "Bouncing";
         let timeWhenGameStarted = Date.now();
         let frameCount = 0;
         let score = 0;
-        // AI有多个，需要有容器来存储它
-        let enemyList = {};
-        let upgradeList = {};
-        let bulletList = {};
+        let Img = {};
+        Img.player = new Image();
+        Img.player.src = 'img/player.png';
+        Img.enemy = new Image();
+        Img.enemy.src = 'img/enemy.png';
+        Img.bullet = new Image();
+        Img.bullet.src = 'img/bullet.png';
+        Img.upgrade1 = new Image();
+        Img.upgrade1.src = 'img/upgrade1.png';
+        Img.upgrade2 = new Image();
+        Img.upgrade2.src = 'img/upgrade2.png';
+        Img.map = new Image();
+        Img.map.src = 'img/map.png';
         ctx.font = '30px Arial';    // Setting font
-
-        // 玩家只有一个，所以只需要一个变量
-        let player;
-
-        // 实例
-        function Entity(type, id, x, y, spdX, spdY, width, height, color) {
-            let self = {
-                type: type,
-                id: id,
-                x: x,
-                y: y,
-                spdX: spdX,
-                spdY: spdY,
-                width: width,
-                height: height,
-                color: color,
-            };
-
-            // 更新实例位置
-            self.updatePosition = function () {
-                self.x += self.spdX;
-                self.y += self.spdY;
-
-                if (self.x < 0 || self.x > WIDTH) {
-                    self.spdX = -self.spdX;
-                }
-
-                if (self.x < 0 || self.x > HEIGHT) {
-                    self.spdY = -self.spdY;
-                }
-                    
-            };
-
-            // 显示实例
-            self.draw = function() {
-                ctx.save();
-                ctx.fillStyle = self.color;
-                ctx.fillRect(self.x - self.width/2, self.y - self.height/2, self.width, self.height);      
-                ctx.restore();
-            };
-
-            // 更新实例
-            self.update = function () {
-                self.updatePosition();
-                self.draw();
-            };
-
-                    // 计算两个实例之间的距离
-            self.getDisctance = function(entity2) {
-                let vx = self.x - entity2.x;
-                let vy = self.y - entity2.y;
-                return Math.sqrt(vx*vx + vy*vy);
-            };
-            
-                    // 测试两个实例之间位置是否够近
-            self.testCollision = function(entity2) {
-                let rect1 = {
-                    x: self.x - self.width/2,
-                    y: self.y - self.height/2,
-                    width: self.width,
-                    height: self.height,
-                };
-                let rect2 = {
-                    x: entity2.x - entity2.width/2,
-                    y: entity2.y - entity2.height/2,
-                    width: entity2.width,
-                    height: entity2.height,
-                };
-                return testCollisionRectRect(rect1, rect2);
-            }
-
-            return self;
-        };
-
-        // 添加玩家和AI的实例
-        Actor = function(type, id, x, y, spdX, spdY, width, height, color, hp, atkSpd) {
-            let self = Entity(type, id, x, y, spdX, spdY, width, height, color);
-
-            self.hp = hp;
-            self.atkSpd = atkSpd;
-            self.attackCounter = 0;
-            self.aimAngle = 0;
-
-            // 类似子类继承超类，减少覆写的代码量
-            let super_update = self.update;
-            self.update = function() {
-                super_update();
-                self.attackCounter += self.atkSpd;
-            }
-
-            // 普通攻击
-            self.performAttack = function() {
-                if (self.attackCounter > 25) {
-                    self.attackCounter = 0;
-                    randomlyGenerateBullet(self);
-                }
-            };
-
-            // 大招
-            self.performSpecialAttack = function() {
-                if (self.attackCounter > 50) {
-                    self.attackCounter = 0;
-
-                    randomlyGenerateBullet(self, self.aimAngle - 5);
-                    randomlyGenerateBullet(self, self.aimAngle);
-                    randomlyGenerateBullet(self, self.aimAngle + 5);
-                }
-            };
-
-            return self;
-        }
-
-        // 生成玩家
-        Player = function() {
-            let self = Actor('player', 'myId', 50, 40, 30, 5, 20, 20, 'green', 10, 1);
-
-            self.pressingDown = false;
-            self.pressingUp = false;
-            self.pressingLeft = false;
-            self.pressingRight = false;
-
-            // 覆写玩家移动
-            self.updatePosition = function() {
-                if (self.pressingRight) {
-                        self.x += 10;
-                    }
-                    if (self.pressingLeft) {
-                        self.x -= 10;
-                    }
-                    if (self.pressingDown) {
-                        self.y += 10;
-                    }
-                    if (self.pressingUp) {
-                        self.y -= 10;
-                    }
-
-                    if (self.x < self.width / 2) {
-                        self.x = self.width / 2;
-                    }
-                    if (self.x > WIDTH - self.width / 2) {
-                        self.x = WIDTH - self.width / 2;
-                    }
-                    if (self.y < self.height / 2) {
-                        self.y = self.height / 2;
-                    }
-                    if (self.y > HEIGHT - self.height / 2) {
-                        self.y = HEIGHT - self.height / 2;
-                    }
-            };
-
-            let super_update = self.update;
-            self.update = function() {
-                super_update();
-                if (player.hp <= 0) {
-                    let timeSurvived = Date.now() - timeWhenGameStarted;
-                    console.log('You lost! You survived for ' + timeSurvived + " ms.");
-                    // 游戏重新开始
-                    startNewGame();
-                }    
-            }
-            
-            return self;
-        };
-        player = Player();
-
-        // AI 属性
-        function Enemy(id, x, y, spdX, spdY, width, height) {
-            let self = Actor('enemy', id, x, y, spdX, spdY, width, height, 'red', 10, 1);
-
-            let super_update = self.update;
-            self.update = function() {
-                super_update();
-                self.performAttack();
-
-                let isColliding = player.testCollision(self);
-                if (isColliding) {
-                    player.hp = player.hp - 1;
-                }
-            }
-            
-            enemyList[id] = self;
-        }
-
-        // 奖励
-        function Upgrade(id, x, y, spdX, spdY, width, height, color, category) {
-            let self = Entity('upgrade', id, x, y, spdX, spdY, width, height, color);
-
-            self.category = category;
-
-            let super_update = self.update;
-            self.update = function() {
-                super_update();
-                let isColliding = player.testCollision(self);
-                if (isColliding) {
-                    if (self.category === 'score') {
-                        score += 100;
-                    }
-                    if (self.category === 'atkSpd') {
-                        player.atkSpd += 3;
-                    }
-                    ids.push(self.id);
-                    delete upgradeList[self.id];                 
-                }
-            }
-
-            upgradeList[id] = self;
-        }
-
-        // 子弹
-        function Bullet(id, x, y, spdX, spdY, width, height) {
-            let self = Entity('bullet', id, x, y, spdX, spdY, width, height, 'black');
-
-            self.timer = 0;
-
-            let super_update = self.update;
-            self.update = function() {
-                super_update();
-                let toRemove = false;
-                self.timer++;
-                if (self.timer > 75) {
-                    toRemove = true;
-                }
-
-                for (let key in enemyList) {
-                    // let isColliding = self.testCollision(enemyList[key]);
-                    // if (isColliding) {
-                    //     toRemove = true;
-                    //     delete enemyList[key];
-                    //     break;
-                    // }
-                }
-                if (toRemove) {
-                    delete bulletList[self.id];
-                }
-            }
-
-            bulletList[id] = self;
-        }
-
 
 
         function testCollisionRectRect(rect1, rect2) {
@@ -322,58 +91,6 @@
             }
         };
 
-        // 随机生成AI
-        function randomlyGenerateEnemy() {
-            let x = Math.random() * WIDTH;
-            let y = Math.random() * HEIGHT;
-            let height = Math.random() * 30 + 10;
-            let width = Math.random() * 30 + 10;
-            let id = Math.random();
-            let spdX = Math.random() * 5 + 5;
-            let spdY = Math.random() * 5 + 5;
-            Enemy(id, x, y, spdX, spdY, width, height);
-        }
-
-        // 随机生成奖励
-        function randomlyGenerateUpgrade() {
-            let x = Math.random() * WIDTH;
-            let y = Math.random() * HEIGHT;
-            let height = 10;
-            let width = 10;
-            let id = Math.random();
-            let spdX = 0;
-            let spdY = 0;
-            let category;
-            let color;
-
-            if (Math.random() < 0.5) {
-                category = 'score';
-                color = 'orange';
-            } else {
-                category = 'atkSpd';
-                color = 'purple';
-            }
-            Upgrade(id, x, y, spdX, spdY, width, height, color, category);
-        }
-
-        // 随机生成子弹
-        function randomlyGenerateBullet(entity, overwriteAngle) {
-            let x = entity.x;
-            let y = entity.y;
-            let height = 10;
-            let width = 10;
-            let id = Math.random();
-
-            // 子弹发射角度随机，角度不能用 degree 来表示，应用 rad
-            let angle = entity.aimAngle;
-            if (overwriteAngle !== undefined) {
-                angle = overwriteAngle;
-            }
-            let spdX = Math.cos(angle/180*Math.PI) * 5;
-            let spdY = Math.sin(angle/180*Math.PI) * 5;
-            Bullet(id, x, y, spdX, spdY, width, height);
-        }
-
         function startNewGame() {
             timeWhenGameStarted = Date.now();
             player.hp = 10;
@@ -420,6 +137,7 @@
             ctx.fillText('Score:' + score, 200, 30);
         }
 
+        player = Player();
         startNewGame();
         setInterval(update, 40);
     </script>
