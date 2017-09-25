@@ -149,6 +149,17 @@
             }
         }
 
+        document.oncontextmenu = function(event) {
+            event.preventDefault();
+            if (player.attackCounter > 50) {
+                for (let i = 0; i < 360; i++) {
+                    randomlyGenerateBullet(player, i);
+                }   
+
+                player.attackCounter = 0;            
+            }
+        }
+
         // 玩家用 WSAD 来控制角色
         document.onkeydown = function(event) {
             if (event.keyCode === 68) {
@@ -265,7 +276,7 @@
         }
 
         // 随机生成子弹
-        function randomlyGenerateBullet(entity) {
+        function randomlyGenerateBullet(entity, overwriteAngle) {
             let x = entity.x;
             let y = entity.y;
             let height = 10;
@@ -273,6 +284,9 @@
             let id = Math.random();
             // 子弹发射角度随机，角度不能用 degree 来表示，应用 rad
             let angle = entity.aimAngle;
+            if (overwriteAngle !== undefined) {
+                angle = overwriteAngle;
+            }
             let spdX = Math.cos(angle/180*Math.PI) * 5;
             let spdY = Math.sin(angle/180*Math.PI) * 5;
             Bullet(id, x, y, spdX, spdY, width, height);
