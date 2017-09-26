@@ -22,11 +22,14 @@
         let timeWhenGameStarted = Date.now();
         let frameCount = 0;
         let score = 0;
+        let paused = false;
         let Img = {};
         Img.player = new Image();
         Img.player.src = 'img/player.png';
-        Img.enemy = new Image();
-        Img.enemy.src = 'img/enemy.png';
+        Img.bat = new Image();
+        Img.bat.src = 'img/bat.png';
+        Img.bee = new Image();
+        Img.bee.src = 'img/bee.png';
         Img.bullet = new Image();
         Img.bullet.src = 'img/bullet.png';
         Img.upgrade1 = new Image();
@@ -77,6 +80,8 @@
                 player.pressingLeft = true;
             } else if (event.keyCode === 87) {
                 player.pressingUp = true;
+            } else if (event.keyCode === 80) {
+                paused = !paused;
             }
         };
 
@@ -124,6 +129,10 @@
 
         // 更新画布
         function update() {
+            if (paused) {
+                ctx.fillText('Paused!', WIDTH/2, HEIGHT/2);
+                return;
+            }
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
             currentMap.draw();
             score++;

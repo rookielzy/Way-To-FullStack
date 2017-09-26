@@ -157,8 +157,8 @@ Player = function () {
 };
 
 // AI 属性
-function Enemy(id, x, y, width, height) {
-    let self = Actor('enemy', id, x, y, width, height, Img.enemy, 10, 1);
+function Enemy(id, x, y, width, height, img, hp, atkSpd) {
+    let self = Actor('enemy', id, x, y, width, height, img, hp, atkSpd);
 
     let super_update = self.update;
     self.update = function () {
@@ -255,8 +255,13 @@ function Bullet(id, x, y, spdX, spdY, width, height, combatType) {
         if (self.combatType === 'player') {
             for (let key in enemyList){
                 if (self.testCollision(enemyList[key])) {
-                    toRemove = true;
-                    delete enemyList[key];
+                    // toRemove = true;
+                    // delete enemyList[key];
+                    if (enemyList[key].hp <= 0) {
+                        toRemove = true;
+                        delete enemyList[key];
+                    }
+                    enemyList[key].hp -= 0.1;
                 }
             }
         } else if (self.combatType === 'enemy') {
@@ -282,7 +287,11 @@ function randomlyGenerateEnemy() {
     let height = 64;
     let width = 64;
     let id = Math.random();
-    Enemy(id, x, y, width, height);
+    if (Math.random() > 0.5) {
+        Enemy(id, x, y, width, height, Img.bat, 2, 1);        
+    } else {
+        Enemy(id, x, y, width, height, Img.bee, 1, 3);                
+    }
 }
 
 // 随机生成奖励
