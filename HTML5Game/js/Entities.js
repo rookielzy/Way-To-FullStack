@@ -22,11 +22,11 @@ function Entity(type, id, x, y, spdX, spdY, width, height, img) {
         self.x += self.spdX;
         self.y += self.spdY;
 
-        if (self.x < 0 || self.x > WIDTH) {
+        if (self.x < 0 || self.x > currentMap.width) {
             self.spdX = -self.spdX;
         }
 
-        if (self.x < 0 || self.x > HEIGHT) {
+        if (self.y < 0 || self.y > currentMap.height) {
             self.spdY = -self.spdY;
         }
 
@@ -43,7 +43,7 @@ function Entity(type, id, x, y, spdX, spdY, width, height, img) {
 
         x -= self.width/2;
         y -= self.height/2;
-        
+
         ctx.drawImage(self.img, 0, 0, self.img.width, self.img.height, x, y, self.width, self.height);
         ctx.restore();
     };
@@ -145,14 +145,14 @@ Player = function () {
         if (self.x < self.width / 2) {
             self.x = self.width / 2;
         }
-        if (self.x > WIDTH - self.width / 2) {
-            self.x = WIDTH - self.width / 2;
+        if (self.x > currentMap.width - self.width / 2) {
+            self.x = currentMap.width - self.width / 2;
         }
         if (self.y < self.height / 2) {
             self.y = self.height / 2;
         }
-        if (self.y > HEIGHT - self.height / 2) {
-            self.y = HEIGHT - self.height / 2;
+        if (self.y > currentMap.height - self.height / 2) {
+            self.y = currentMap.height - self.height / 2;
         }
     };
 
@@ -178,11 +178,6 @@ function Enemy(id, x, y, spdX, spdY, width, height) {
     self.update = function () {
         super_update();
         self.performAttack();
-
-        let isColliding = player.testCollision(self);
-        if (isColliding) {
-            player.hp = player.hp - 1;
-        }
     }
 
     enemyList[id] = self;
@@ -213,10 +208,11 @@ function Upgrade(id, x, y, spdX, spdY, width, height, img, category) {
 }
 
 // 子弹
-function Bullet(id, x, y, spdX, spdY, width, height) {
+function Bullet(id, x, y, spdX, spdY, width, height, combatType) {
     let self = Entity('bullet', id, x, y, spdX, spdY, width, height, Img.bullet);
 
     self.timer = 0;
+    self.combatType = combatType;
 
     let super_update = self.update;
     self.update = function () {
@@ -227,14 +223,20 @@ function Bullet(id, x, y, spdX, spdY, width, height) {
             toRemove = true;
         }
 
-        for (let key in enemyList) {
-            // let isColliding = self.testCollision(enemyList[key]);
-            // if (isColliding) {
-            //     toRemove = true;
-            //     delete enemyList[key];
-            //     break;
-            // }
+        if (self.combatType === 'player') {
+            for (let key in enemyList){
+                if (self.testCollision(enemyList[key])) {
+                    toRemove = true;
+                    delete enemyList[key];
+                }
+            }
+        } else if (self.combatType === 'enemy') {
+            if (self.testCollision(player)) {
+                toRemove = true;
+                player.hp -= 1;
+            }
         }
+        
         if (toRemove) {
             delete bulletList[self.id];
         }
@@ -246,8 +248,8 @@ function Bullet(id, x, y, spdX, spdY, width, height) {
 
 // 随机生成AI
 function randomlyGenerateEnemy() {
-    let x = Math.random() * WIDTH;
-    let y = Math.random() * HEIGHT;
+    let x = Math.random() * currentMap.width;
+    let y = Math.random() * currentMap.height;
     let height = 64;
     let width = 64;
     let id = Math.random();
@@ -258,8 +260,8 @@ function randomlyGenerateEnemy() {
 
 // 随机生成奖励
 function randomlyGenerateUpgrade() {
-    let x = Math.random() * WIDTH;
-    let y = Math.random() * HEIGHT;
+    let x = Math.random() * currentMap.width;
+    let y = Math.random() * currentMap.height;
     let height = 32;
     let width = 32;
     let id = Math.random();
@@ -293,5 +295,5 @@ function randomlyGenerateBullet(entity, overwriteAngle) {
     }
     let spdX = Math.cos(angle / 180 * Math.PI) * 5;
     let spdY = Math.sin(angle / 180 * Math.PI) * 5;
-    Bullet(id, x, y, spdX, spdY, width, height);
+    Bullet(id, x, y, spdX, spdY, width, height, entity.type);
 }

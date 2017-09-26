@@ -37,6 +37,7 @@
         Img.map.src = 'img/map.png';
         ctx.font = '30px Arial';    // Setting font
 
+        let currentMap = Maps('field', 'img/map.png', 1280, 960);
 
         function testCollisionRectRect(rect1, rect2) {
             return rect1.x <= rect2.x + rect2.width
@@ -49,8 +50,8 @@
             let mouseX = mouse.clientX - 8;
             let mouseY = mouse.clientY - 8;
 
-            mouseX -= player.x;
-            mouseY -= player.y;
+            mouseX -= WIDTH/2;
+            mouseY -= HEIGHT/2;
 
             player.aimAngle = Math.atan2(mouseY, mouseX) / Math.PI * 180;          
         };
@@ -104,16 +105,27 @@
             randomlyGenerateEnemy();
         }
 
-        function drawMap() {
-            let x = WIDTH/2 - player.x;
-            let y = HEIGHT/2 - player.y;
-            ctx.drawImage(Img.map, 0, 0, Img.map.width, Img.map.height, x, y, Img.map.width * 2, Img.map.height * 2);
-        }
+        function Maps(id, imgSrc, width, height) {
+            let self = {
+                id: id,
+                image: new Image(),
+                width: width,
+                height: height,
+            };
+            self.image.src = imgSrc;
+
+            self.draw = function () {
+                let x = WIDTH / 2 - player.x;
+                let y = HEIGHT / 2 - player.y;
+                ctx.drawImage(Img.map, 0, 0, Img.map.width, Img.map.height, x, y, Img.map.width * 2, Img.map.height * 2);
+            };
+            return self;
+        } 
 
         // 更新画布
         function update() {
             ctx.clearRect(0, 0, WIDTH, HEIGHT);
-            drawMap();
+            currentMap.draw();
             score++;
             frameCount++;
 
