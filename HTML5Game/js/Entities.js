@@ -4,33 +4,19 @@ let upgradeList = {};
 let bulletList = {};
 
 // 实例
-function Entity(type, id, x, y, spdX, spdY, width, height, img) {
+function Entity(type, id, x, y, width, height, img) {
     let self = {
         type: type,
         id: id,
         x: x,
         y: y,
-        spdX: spdX,
-        spdY: spdY,
         width: width,
         height: height,
         img: img,
     };
 
-    // 更新实例位置
-    self.updatePosition = function () {
-        self.x += self.spdX;
-        self.y += self.spdY;
-
-        if (self.x < 0 || self.x > currentMap.width) {
-            self.spdX = -self.spdX;
-        }
-
-        if (self.y < 0 || self.y > currentMap.height) {
-            self.spdY = -self.spdY;
-        }
-
-    };
+    // 实例不再移动，奖励将会继承，其他会覆写移动功能
+    self.updatePosition = function () {};
 
     // 显示实例
     self.draw = function () {
@@ -82,8 +68,8 @@ function Entity(type, id, x, y, spdX, spdY, width, height, img) {
 };
 
 // 添加玩家和AI的实例
-Actor = function (type, id, x, y, spdX, spdY, width, height, img, hp, atkSpd) {
-    let self = Entity(type, id, x, y, spdX, spdY, width, height, img);
+Actor = function (type, id, x, y, width, height, img, hp, atkSpd) {
+    let self = Entity(type, id, x, y, width, height, img);
 
     self.hp = hp;
     self.atkSpd = atkSpd;
@@ -120,7 +106,7 @@ Actor = function (type, id, x, y, spdX, spdY, width, height, img, hp, atkSpd) {
 }
 
 Player = function () {
-    let self = Actor('player', 'myId', 50, 40, 30, 5, 50, 70, Img.player, 10, 1);
+    let self = Actor('player', 'myId', 50, 40, 50, 70, Img.player, 10, 1);
 
     self.pressingDown = false;
     self.pressingUp = false;
@@ -171,21 +157,49 @@ Player = function () {
 };
 
 // AI 属性
-function Enemy(id, x, y, spdX, spdY, width, height) {
-    let self = Actor('enemy', id, x, y, spdX, spdY, width, height, Img.enemy, 10, 1);
+function Enemy(id, x, y, width, height) {
+    let self = Actor('enemy', id, x, y, width, height, Img.enemy, 10, 1);
 
     let super_update = self.update;
     self.update = function () {
         super_update();
         self.performAttack();
+        // 记得调用攻击，使其能自动发动攻击
+        self.updateAim();
+    };
+
+    // AI追随玩家
+    self.updatePosition = function() {
+        let diffX = player.x - self.x;
+        let diffY = player.y - self.y;
+
+        if (diffX > 0) {
+            self.x += 3;
+        } else {
+            self.x -= 3;
+        }
+
+        if (diffY > 0) {
+            self.y += 3;
+        } else {
+            self.y -= 3;
+        }
+    }
+
+    // AI攻击方向追随玩家
+    self.updateAim = function() {
+        let diffX = player.x - self.x;
+        let diffY = player.y - self.y;
+
+        self.aimAngle = Math.atan2(diffY, diffX) / Math.PI * 180;
     }
 
     enemyList[id] = self;
 }
 
 // 奖励
-function Upgrade(id, x, y, spdX, spdY, width, height, img, category) {
-    let self = Entity('upgrade', id, x, y, spdX, spdY, width, height, img);
+function Upgrade(id, x, y, width, height, img, category) {
+    let self = Entity('upgrade', id, x, y, width, height, img);
 
     self.category = category;
 
@@ -207,12 +221,14 @@ function Upgrade(id, x, y, spdX, spdY, width, height, img, category) {
     upgradeList[id] = self;
 }
 
-// 子弹
+// 子弹，保留加速度使其能根据玩家位置进行攻击
 function Bullet(id, x, y, spdX, spdY, width, height, combatType) {
-    let self = Entity('bullet', id, x, y, spdX, spdY, width, height, Img.bullet);
+    let self = Entity('bullet', id, x, y, width, height, Img.bullet);
 
     self.timer = 0;
     self.combatType = combatType;
+    self.spdX = spdX;
+    self.spdY = spdY;
 
     let super_update = self.update;
     self.update = function () {
@@ -222,6 +238,19 @@ function Bullet(id, x, y, spdX, spdY, width, height, combatType) {
         if (self.timer > 75) {
             toRemove = true;
         }
+
+        // 子弹攻击轨道不同，需要覆写
+        self.updatePosition = function(){
+            self.x += self.spdX;
+            self.y += self.spdY;
+                    
+            if(self.x < 0 || self.x > currentMap.width){
+                self.spdX = -self.spdX;
+            }
+            if(self.y < 0 || self.y > currentMap.height){
+                self.spdY = -self.spdY;
+            }
+        };
 
         if (self.combatType === 'player') {
             for (let key in enemyList){
@@ -253,9 +282,7 @@ function randomlyGenerateEnemy() {
     let height = 64;
     let width = 64;
     let id = Math.random();
-    let spdX = Math.random() * 5 + 5;
-    let spdY = Math.random() * 5 + 5;
-    Enemy(id, x, y, spdX, spdY, width, height);
+    Enemy(id, x, y, width, height);
 }
 
 // 随机生成奖励
@@ -265,8 +292,6 @@ function randomlyGenerateUpgrade() {
     let height = 32;
     let width = 32;
     let id = Math.random();
-    let spdX = 0;
-    let spdY = 0;
     let category;
     let img;
 
@@ -277,7 +302,7 @@ function randomlyGenerateUpgrade() {
         category = 'atkSpd';
         img = Img.upgrade2;
     }
-    Upgrade(id, x, y, spdX, spdY, width, height, img, category);
+    Upgrade(id, x, y, width, height, img, category);
 }
 
 // 随机生成子弹
