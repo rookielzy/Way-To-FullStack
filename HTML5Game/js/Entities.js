@@ -35,9 +35,16 @@ function Entity(type, id, x, y, spdX, spdY, width, height, img) {
     // 显示实例
     self.draw = function () {
         ctx.save();
-        let x = self.x - self.width / 2;
-        let y = self.y - self.height / 2;
-        ctx.drawImage(self.img, x, y);
+        let x = self.x - player.x;
+        let y = self.y - player.y;
+
+        x += WIDTH/2;
+        y += HEIGHT/2;
+
+        x -= self.width/2;
+        y -= self.height/2;
+        
+        ctx.drawImage(self.img, 0, 0, self.img.width, self.img.height, x, y, self.width, self.height);
         ctx.restore();
     };
 
@@ -113,7 +120,7 @@ Actor = function (type, id, x, y, spdX, spdY, width, height, img, hp, atkSpd) {
 }
 
 Player = function () {
-    let self = Actor('player', 'myId', 50, 40, 30, 5, 20, 20, Img.player, 10, 1);
+    let self = Actor('player', 'myId', 50, 40, 30, 5, 50, 70, Img.player, 10, 1);
 
     self.pressingDown = false;
     self.pressingUp = false;
@@ -241,8 +248,8 @@ function Bullet(id, x, y, spdX, spdY, width, height) {
 function randomlyGenerateEnemy() {
     let x = Math.random() * WIDTH;
     let y = Math.random() * HEIGHT;
-    let height = Math.random() * 30 + 10;
-    let width = Math.random() * 30 + 10;
+    let height = 64;
+    let width = 64;
     let id = Math.random();
     let spdX = Math.random() * 5 + 5;
     let spdY = Math.random() * 5 + 5;
@@ -253,8 +260,8 @@ function randomlyGenerateEnemy() {
 function randomlyGenerateUpgrade() {
     let x = Math.random() * WIDTH;
     let y = Math.random() * HEIGHT;
-    let height = 10;
-    let width = 10;
+    let height = 32;
+    let width = 32;
     let id = Math.random();
     let spdX = 0;
     let spdY = 0;
@@ -275,8 +282,8 @@ function randomlyGenerateUpgrade() {
 function randomlyGenerateBullet(entity, overwriteAngle) {
     let x = entity.x;
     let y = entity.y;
-    let height = 10;
-    let width = 10;
+    let height = 32;
+    let width = 32;
     let id = Math.random();
 
     // 子弹发射角度随机，角度不能用 degree 来表示，应用 rad
