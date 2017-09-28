@@ -1,0 +1,26 @@
+{
+  "name": "reduxapp",
+  "version": "1.0.0",
+  "description": "Learning About Redux",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "redux"
+  ],
+  "author": "rookielzy",
+  "license": "ISC",
+  "devDependencies": {
+    "express": "^4.15.5",
+    "webpack": "^2.2.1"
+  },
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-1": "^6.24.1",
+    "redux": "^3.7.2"
+  }
+}
