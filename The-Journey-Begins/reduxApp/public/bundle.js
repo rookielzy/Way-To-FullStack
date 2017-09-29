@@ -1312,16 +1312,45 @@ module.exports = function(module) {
 "use strict";
 
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _redux = __webpack_require__(7);
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 // STEP 3 define reducers
 var reducer = function reducer() {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { books: [] };
     var action = arguments[1];
 
     switch (action.type) {
         case "POST_BOOK":
-            return state = action.payload;
+            var books = state.books.concat(action.payload);
+            return { books: books };
+            break;
+
+        case "DELETE_BOOK":
+            var currentBookToDelete = [].concat(_toConsumableArray(state.books));
+            var indexToDelete = currentBookToDelete.findIndex(function (book) {
+                return book.id === action.payload.id;
+            });
+
+            return { books: [].concat(_toConsumableArray(currentBookToDelete.slice(0, indexToDelete)), _toConsumableArray(currentBookToDelete.slice(indexToDelete + 1))) };
+            break;
+
+        case "UPDATE_BOOK":
+            var currentBookToUpdate = [].concat(_toConsumableArray(state.books));
+            var indexToUpdate = currentBookToUpdate.findIndex(function (book) {
+                return book.id === action.payload.id;
+            });
+
+            var newBookToUpdate = _extends({}, currentBookToUpdate[indexToUpdate], {
+                title: action.payload.title
+            });
+
+            console.log('What is it newBookToUpdate ', newBookToUpdate);
+
+            return { books: [].concat(_toConsumableArray(currentBookToUpdate.slice(0, indexToUpdate)), [newBookToUpdate], _toConsumableArray(currentBookToUpdate.slice(indexToUpdate + 1))) };
             break;
     }
     return state;
@@ -1332,17 +1361,35 @@ var store = (0, _redux.createStore)(reducer);
 
 store.subscribe(function () {
     console.log('current state is: ', store.getState());
-    console.log('current price is: ', store.getState().price);
+    // console.log('current price is: ', store.getState()[1].price);    
 });
 
 // STEP 2 create and dispatch actions
 store.dispatch({
     type: "POST_BOOK",
-    payload: {
+    payload: [{
         id: 1,
         title: 'This is the book title',
         description: 'This is the book description',
         price: 24
+    }, {
+        id: 2,
+        title: 'This is the second book title',
+        description: 'This is the second book description',
+        price: 40
+    }]
+});
+
+store.dispatch({
+    type: "DELETE_BOOK",
+    payload: { id: 1 }
+});
+
+store.dispatch({
+    type: "UPDATE_BOOK",
+    payload: {
+        id: 2,
+        title: "Update the book Title"
     }
 });
 
