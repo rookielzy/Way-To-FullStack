@@ -1,15 +1,23 @@
-import { createStore } from 'redux';
+import { createStore, applyMiddleware } from 'redux';
+import logger from 'redux-logger';
+import React from 'react';
+import { render } from 'react-dom';
 import reducers from './reducers/index';
 import { addToCart } from './actions/cartActions';
 import { postBooks, deleteBooks, updateBooks } from './actions/booksActions';
+import BooksList from './components/pages/booksList';
 
 // STEP 1 create the store
-const store = createStore(reducers);
+const middleware = applyMiddleware(logger);
 
-store.subscribe(() => {
-    console.log('current state is: ', store.getState());
+const store = createStore(reducers, middleware);
+
+// store.subscribe(() => {
+    // console.log('current state is: ', store.getState());
     // console.log('current price is: ', store.getState()[1].price);    
-});
+// });
+
+render(<BooksList />, document.getElementById('app'));
 
 // STEP 2 create and dispatch actions
 store.dispatch(postBooks(
