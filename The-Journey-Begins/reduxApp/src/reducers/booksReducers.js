@@ -26,7 +26,7 @@ export function booksReducers(state = { books: [
         case "DELETE_BOOK":
             const currentBookToDelete = [...state.books];
             const indexToDelete = currentBookToDelete.findIndex(book => {
-                return book._id === action.payload._id;
+                return book._id.toString() === action.payload;
             });
 
             return { books: [...currentBookToDelete.slice(0, indexToDelete), ...currentBookToDelete.slice(indexToDelete + 1)] };
