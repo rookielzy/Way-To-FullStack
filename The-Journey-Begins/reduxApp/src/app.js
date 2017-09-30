@@ -13,28 +13,6 @@ const middleware = applyMiddleware(logger);
 
 const store = createStore(reducers, middleware);
 
-
-// STEP 2 create and dispatch actions
-// store.dispatch(postBooks(
-//     {
-//         type: "POST_BOOK",
-//         payload: [
-//             {
-//                 id: 1,
-//                 title: 'This is the book title',
-//                 description: 'This is the book description',
-//                 price: 24
-//             },
-//             {
-//                 id: 2,
-//                 title: 'This is the second book title',
-//                 description: 'This is the second book description',
-//                 price: 40
-//             }
-//         ]
-//     }
-// ));
-
 render(
     <Provider store={store}>
         <BooksList />
