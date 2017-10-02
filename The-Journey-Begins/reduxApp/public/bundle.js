@@ -8369,8 +8369,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 // GET A BOOK
 function getBooks() {
-    return {
-        type: "GET_BOOKS"
+    return function (dispatch) {
+        _axios2.default.get('/books').then(function (res) {
+            dispatch({ type: "GET_BOOKS", payload: res.data });
+        }).catch(function (err) {
+            dispatch({ type: "GET_BOOKS_REJECTED", payload: err });
+        });
     };
 }
 
@@ -8388,9 +8392,12 @@ function postBooks(book) {
 
 // DELETE A BOOK
 function deleteBooks(_id) {
-    return {
-        type: "DELETE_BOOK",
-        payload: _id
+    return function (dispatch) {
+        _axios2.default.delete('/books/' + _id).then(function (res) {
+            dispatch({ type: "DELETE_BOOK", payload: _id });
+        }).catch(function (err) {
+            dispatch({ type: "DELETE_BOOK_REJECTED", payload: err });
+        });
     };
 }
 
@@ -24961,22 +24968,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 // BOOKS REDUCERS
 function booksReducers() {
-    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { books: [{
-            _id: 1,
-            title: 'This is the book title',
-            description: 'This is the book description',
-            price: 24
-        }, {
-            _id: 2,
-            title: 'This is the second book title',
-            description: 'This is the second book description',
-            price: 40
-        }] };
+    var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : { books: [] };
     var action = arguments[1];
 
     switch (action.type) {
         case "GET_BOOKS":
-            return _extends({}, state, { books: [].concat(_toConsumableArray(state.books)) });
+            return _extends({}, state, { books: [].concat(_toConsumableArray(action.payload)) });
             break;
 
         case "POST_BOOK":
