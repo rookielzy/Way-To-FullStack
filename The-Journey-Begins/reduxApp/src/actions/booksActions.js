@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 // GET A BOOK
 export function getBooks() {
     return {
@@ -7,9 +9,15 @@ export function getBooks() {
 
 // POST A BOOK
 export function postBooks(book) {
-    return {
-        type: "POST_BOOK",
-        payload: book
+    return function(dispatch) {
+        axios.post("/books", book)
+            .then(function(res) {
+                dispatch({type: "POST_BOOK", payload: res.data});
+                console.log("success post book");
+            })
+            .catch(function(err) {
+                dispatch({type: "POST_BOOK_REJECTED", payload: "There was an error while posting a new book"});
+            })
     }
 }
 

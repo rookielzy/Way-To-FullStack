@@ -10,7 +10,6 @@ class BooksFrom extends React.Component {
 
     handleSubmit = () => {
         const book=[{
-            _id: Math.random(),
             title: findDOMNode(this.refs.title).value,
             description: findDOMNode(this.refs.description).value,
             price: findDOMNode(this.refs.price).value,
