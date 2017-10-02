@@ -8370,7 +8370,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 // GET A BOOK
 function getBooks() {
     return function (dispatch) {
-        _axios2.default.get('/books').then(function (res) {
+        _axios2.default.get('/api/books').then(function (res) {
             dispatch({ type: "GET_BOOKS", payload: res.data });
         }).catch(function (err) {
             dispatch({ type: "GET_BOOKS_REJECTED", payload: err });
@@ -8381,7 +8381,7 @@ function getBooks() {
 // POST A BOOK
 function postBooks(book) {
     return function (dispatch) {
-        _axios2.default.post("/books", book).then(function (res) {
+        _axios2.default.post("/api/books", book).then(function (res) {
             dispatch({ type: "POST_BOOK", payload: res.data });
             console.log("success post book");
         }).catch(function (err) {
@@ -8393,7 +8393,7 @@ function postBooks(book) {
 // DELETE A BOOK
 function deleteBooks(_id) {
     return function (dispatch) {
-        _axios2.default.delete('/books/' + _id).then(function (res) {
+        _axios2.default.delete('/api/books/' + _id).then(function (res) {
             dispatch({ type: "DELETE_BOOK", payload: _id });
         }).catch(function (err) {
             dispatch({ type: "DELETE_BOOK_REJECTED", payload: err });
