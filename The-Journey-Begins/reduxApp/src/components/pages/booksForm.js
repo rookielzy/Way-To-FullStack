@@ -4,13 +4,13 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { findDOMNode } from 'react-dom';
 import axios from 'axios';
-import { postBooks, deleteBooks, getBooks } from '../../actions/booksActions';
+import { postBooks, deleteBooks, getBooks, resetButton } from '../../actions/booksActions';
 
 
 class BooksFrom extends React.Component {
 
-    constructor(props) {
-        super(props);
+    constructor() {
+        super();
         this.state = {
             images: [{}],
             img: ''
@@ -51,9 +51,21 @@ class BooksFrom extends React.Component {
             img: '/images/' + imgName
         })
     }
+    
+    resetForm = () => {
+
+        this.props.resetButton();
+
+        findDOMNode(this.refs.title).value = '';
+        findDOMNode(this.refs.description).value = '';
+        findDOMNode(this.refs.price).value = '';
+        this.setState({
+            img: ''
+        })
+    }
 
     render() {
-
+        console.log(this.props.books);
         const booksList = this.props.books.map(book => {
             return (
                 <option key={book._id}>{book._id}</option>
@@ -87,31 +99,39 @@ class BooksFrom extends React.Component {
                     </Col>
                     <Col xs={12} sm={6}>
                         <Panel>
-                            <FormGroup>
+                            <FormGroup controlId="title" validationState={this.props.validation}>
                                 <ControlLabel>Title</ControlLabel>
                                 <FormControl
                                     type="text"
                                     placeholder="Enter Title"
                                     ref="title"
                                 />
+                                <FormControl.Feedback />
                             </FormGroup>
-                            <FormGroup>
+                            <FormGroup controlId="description" validationState={this.props.validation}>
                                 <ControlLabel>Description</ControlLabel>
                                 <FormControl
                                     type="text"
                                     placeholder="Enter Description"
                                     ref="description"
                                 />
+                                <FormControl.Feedback />
                             </FormGroup>
-                            <FormGroup>
+                            <FormGroup controlId="price" validationState={this.props.validation}>
                                 <ControlLabel>Price</ControlLabel>
                                 <FormControl
                                     type="text"
                                     placeholder="Enter Price"
                                     ref="price"
                                 />
+                                <FormControl.Feedback />
                             </FormGroup>
-                            <Button onClick={() => this.handleSubmit()} bsStyle="primary">Save Book</Button>
+                            <Button
+                                onClick={(!this.props.msg) ? (() => this.handleSubmit()) : (() => this.resetForm())}
+                                bsStyle={(!this.props.msg) ? ("primary") : (this.props.style)}
+                            >
+                                {!(this.props.msg) ? ("Save Book") : (this.props.msg)}
+                            </Button>
                         </Panel>
                         <Panel style={{ marginTop: '25px' }}>
                             <FormGroup controlId="formControlsSelect">
@@ -132,12 +152,15 @@ class BooksFrom extends React.Component {
 
 function mapStateToProps(state) {
     return {
-        books: state.books.books
+        books: state.books.books,
+        msg: state.books.msg,
+        style: state.books.style,
+        validation: state.books.validation
     }
 }
 
 function mapDispatchToProps(dispatch) {
-    return bindActionCreators({postBooks, deleteBooks, getBooks}, dispatch);
+    return bindActionCreators({postBooks, deleteBooks, getBooks, resetButton}, dispatch);
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(BooksFrom);

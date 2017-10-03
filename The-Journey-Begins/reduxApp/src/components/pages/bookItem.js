@@ -6,6 +6,19 @@ import { addToCart, updateCart } from '../../actions/cartActions';
 
 class BookItem extends React.Component {
 
+    constructor() {
+        super();
+        this.state = {
+            isClick: false
+        };
+    }
+
+    onReadMore = () => {
+        this.setState({
+            isClick: true
+        })
+    }
+
     handleCart = () => {
         const book = [...this.props.cart, {
             _id: this.props._id,
@@ -43,7 +56,11 @@ class BookItem extends React.Component {
                     </Col>
                     <Col xs={6} sm={8}>
                         <h6>{this.props.title}</h6>
-                        <p>{this.props.description}</p>
+                        <p>{(this.props.description.length > 50 && this.state.isClick === false) ? (this.props.description.substring(0, 50)) : (this.props.description)}
+                            <button className="link" onClick={() => this.onReadMore()}>
+                                {(this.state.isClick === false && this.props.description !== null && this.props.description.length > 50) ? ("...read more") : ""}
+                            </button>
+                        </p>
                         <h6>usd. {this.props.price}</h6>
                         <Button onClick={() => this.handleCart()} bsStyle="primary">Buy Now</Button>
                     </Col>
