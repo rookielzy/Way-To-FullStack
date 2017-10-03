@@ -3,6 +3,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const fs = require('fs');
 var app = express();
 
 app.use(bodyParser.json());
@@ -101,6 +102,22 @@ app.put('/books/:_id', (req, res) => {
       throw err;
     }
     res.json(books);
+  });
+});
+
+// GET BOOKS IMAGES API
+app.get('/images', (req, res) => {
+  const imgFolder = __dirname + '/public/images/';
+  fs.readdir(imgFolder, (err, files) => {
+    if (err) {
+      return console.error(err);
+    }
+    const filesArr = [];
+    files.forEach(file => {
+      filesArr.push({name: file});
+    });
+
+    res.json(filesArr);
   });
 });
 
