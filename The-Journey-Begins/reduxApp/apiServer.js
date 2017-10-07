@@ -12,7 +12,8 @@ app.use(cookieParser());
 
 // APIs Start
 const mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/bookshop', {useMongoClient: true});
+// mongoose.connect('mongodb://localhost:27017/bookshop', {useMongoClient: true});
+mongoose.connect('mongodb://rookielzy:123@ds113825.mlab.com:13825/bookshop', {useMongoClient: true});
 
 // SET UP SESSIONS START
 const db = mongoose.connection;
