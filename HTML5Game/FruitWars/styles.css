@@ -1,0 +1,31 @@
+body {
+    background: #000900;
+    user-select: none;
+}
+
+#wrapper {
+    position: absolute;
+}
+
+#gameContainer {
+    width: 640px;
+    height: 480px;
+    background: url('images/splashscreen.png');
+}
+
+.gameLayer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: none;
+}
+
+#gameStartScreen {
+    padding-top: 250px;
+    text-align: center;
+}
+
+#gameStartScreen img {
+    margin: 10px;
+    cursor: pointer;
+}

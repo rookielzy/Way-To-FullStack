@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="styles.css" media="screen">
+    <script src="js/game.js"></script>
+    <title>Fruit Wars</title>
+</head>
+<body>
+    <div id="wrapper">
+        <div id="gameContainer">
+            <canvas id="gameCanvas" width="640" height="480" class="gameLayer"></canvas>
+
+            <div id="scoreScreen" class="gameLayer">
+                <img src="images/icons/sound.png" alt="Toggle Music" id="toggleMusic" />
+                <img src="images/icons/prev.png" alt="Restart Level" />
+                <span id="score">SCore: 0</span>
+            </div>
+
+            <div id="gameStartScreen" class="gameLayer">
+                <img src="images/icons/play.png" alt="Play Game" />
+                <br />
+                <img src="images/icons/settings.png" alt="Settings" />
+            </div>
+
+            <div id="levelSelectScreen" class="gameLayer"></div>
+
+            <div id="loadingScreen" class="gameLayer">
+                <div id="loadingMessage"></div>
+            </div>
+
+            <div id="endingScreen" class="gameLayer">
+                <div>
+                    <p id="endingMessage">The Level Is Over Message</p>
+                    <p id="playCurrentLevel" class="endingOption">
+                        <img src="images/icons/prev.png" alt="Replay" />
+                        Current Level
+                    </p>
+                    <p id="playNextLevel" class="endingOption">
+                        <img src="images/icons/next.png" alt="Next" />
+                        Next Level
+                    </p>
+                    <p id="returnToLevelScreen" class="endingOption">
+                        <img src="images/icons/return.png" alt="Return" />
+                        Return to Level Screen
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
