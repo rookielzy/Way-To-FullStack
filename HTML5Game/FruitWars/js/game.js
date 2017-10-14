@@ -1,4 +1,72 @@
 const game = {
+    mode: "intro",
+    // 弹弓的坐标
+    slingshotX: 140,
+    slingshotY: 280,
+
+    // 弹弓
+    slingshotBandX: 140 + 55,
+    slingshotBandY: 280 + 23,
+
+    // 游戏是否结束
+    ended: false,
+
+    // 分数
+    score: 0,
+
+    // 水平平移
+    offsetLeft: 0,
+
+    start: function() {
+        game.hideScreens();
+        // 显示游戏画布和分数
+        game.showScreen("gameCanvas");
+        game.showScreen("scoreScreen");
+
+        game.mode = "intro";
+        game.currentHero = undefined;
+
+        game.offsetLeft = 0;
+        game.ended = false;
+
+        game.animationFrame = window.requestAnimationFrame(game.animate, game.canvas);
+    },
+
+    handleGameLogic: function() {
+        // 游戏进行时场景向右移
+        game.offsetLeft++;
+    },
+    
+    animate: function() {
+        // 处理平移，游戏状态和控制流程
+        game.handleGameLogic();
+
+        // 用视差滚动绘制背景
+        // 首先绘制背景图像，偏移距离的一小部分（1/4）
+        // 比例越大，背景看起来越接近
+        game.context.drawImage(game.currentLevel.backgroundImage,
+                                game.offsetLeft / 4, 0,
+                                game.canvas.width, game.canvas.height,
+                                0, 0,
+                                game.canvas.width, game.canvas.height);
+        // 绘制前景图像，偏移整个offsetLeft距离
+        game.context.drawImage(game.currentLevel.foregroundImage,
+                                game.offsetLeft, 0,
+                                game.canvas.width, game.canvas.height,
+                                0, 0,
+                                game.canvas.width, game.canvas.height
+                            );
+        // 绘制弹弓，偏移整个offsetLeft距离
+        game.context.drawImage(game.slingshotImage, game.slingshotX - game.offsetLeft, game.slingshotY);
+
+        // 绘制弹弓前景，偏移整个offsetLeft距离
+        game.context.drawImage(game.slingshotFrontImage, game.slingshotX - game.offsetLeft, game.slingshotY);
+
+        if (!game.ended) {
+            game.animationFrame = window.requestAnimationFrame(game.animate, game.canvas);
+        }
+    },
+
     // 初始化对象，预加载资源和显示开始界面
     init: function() {
         // 游戏画布，上下文
@@ -78,7 +146,20 @@ const levels = {
 
     // 加载指定关卡所有数据和图片
     load: function(number) {
+        // 声明一个新的当前关卡的对象
+        game.currentLevel = { number: number };
+        game.score = 0;
 
+        document.getElementById('score').innerHTML = "Score: " + game.score;
+        const level = levels.data[number];
+        // 加载背景，前景和弹弓
+        game.currentLevel.backgroundImage = loader.loadImage("images/backgrounds/" + level.background + ".png");
+        game.currentLevel.foregroundImage = loader.loadImage("images/backgrounds/" + level.foreground + ".png");
+        game.slingshotImage = loader.loadImage("images/slingshot.png");
+        game.slingshotFrontImage = loader.loadImage("images/slingshot-front.png");
+
+        // 当资源加载完后调用 game.start()
+        loader.onload = game.start;
     }
 };
 
@@ -143,7 +224,7 @@ const loader = {
 
         document.getElementById("loadingMessage").innerHTML = "Loaded" + loader.loadedCount + " of " + loader.totalCount;
 
-        if (loader.loadedCount === loaded.totalCount) {
+        if (loader.loadedCount === loader.totalCount) {
             // 已完全加载完成
             // 重置并清除 loader
             loader.loaded = true;
