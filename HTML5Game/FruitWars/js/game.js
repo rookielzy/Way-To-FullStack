@@ -17,6 +17,9 @@ const game = {
     // 水平平移
     offsetLeft: 0,
 
+    // 每帧平移的最大速度
+    maxSpeed: 3,
+
     start: function() {
         game.hideScreens();
         // 显示游戏画布和分数
@@ -32,9 +35,87 @@ const game = {
         game.animationFrame = window.requestAnimationFrame(game.animate, game.canvas);
     },
 
+    // 平移画布，使其根据角色进行居中
+    panTo: function(newCenter) {
+        // 最大和最小平移距离
+        const minOffset = 0;
+        const maxOffset = game.currentLevel.backgroundImage.width - game.canvas.width;
+
+        // 当前画布中心为左平移画布宽度的一半。
+        const currentCenter = game.offsetLeft + game.canvas.width / 2;
+
+        // 如果新中心和当前中心之前的距离大于0，并且平移量没有达到最大和最小量，保持平移
+        if (Math.abs(newCenter - currentCenter) > 0 && game.offsetLeft <= maxOffset && game.offsetLeft >= minOffset) {
+            // 我们将会在每一帧平移当前中心与新中心之间距离的一半
+            let deltaX = (newCenter - currentCenter) / 2;
+
+            // 如果 deltaX太大，画布会平移地非常快，当它大于 maxSpeed 时
+            if (Math.abs(deltaX) > game.maxSpeed) {
+                // 限制 deltaX 的大小，使其保持与 maxSpeed 相等或相反数或0
+                deltaX = game.maxSpeed * Math.sign(deltaX);
+            }
+
+            // 如果我们快到达终点时，我们就直接将画布停止平移
+            if (Math.abs(deltaX) <= 1) {
+                deltaX = newCenter - currentCenter;
+            }
+
+            // 最后调整平移量
+            game.offsetLeft += deltaX;
+
+            // 确保我们不超过最大最小的限制
+            if (game.offsetLeft <= minOffset) {
+                game.offsetLeft = minOffset;
+                
+                // 告诉函数我们已经最够接近新中心点了
+                return true;
+            } else if (game.offsetLeft >= maxOffset) {
+                // 告诉函数我们已经最够接近新中心点了                
+                return true;
+            }
+        } else {
+            // 告诉函数我们已经最够接近新中心点了
+            return true;
+        }
+    },
+
     handleGameLogic: function() {
-        // 游戏进行时场景向右移
-        game.offsetLeft++;
+        if (game.mode === "intro") {
+            if (game.panTo(700)) {
+                game.mode = "load-next-hero";
+            }
+        }
+
+        if (game.mode === "wait-for-firing") {
+            if (mouse.dragging) {
+                game.panTo(mouse.x + game.offsetLeft);
+            } else {
+                game.panTo(game.slingShotX);
+            }
+        }
+
+        if (game.mode === "load-next-hero") {
+            // 首先先计算角色和敌人数量，并将它们放进各自的数组中
+            // 检查敌人是否还有存活，如果没有，过关
+            // 检查是否还有更多的角色等待加载，如果没有，失败
+            // 加载角色，设置游戏状态
+            game.mode = "wait-for-firing";
+        }
+
+        if (game.mode === "firing") {
+            // 如果如果按住鼠标，允许调整发射角度
+            // 释放鼠标，发射角色
+        }
+
+        if (game.mode === "fired") {
+            // 移动角色
+            // 等待角色停止移动或超出边界
+        }
+
+        if (game.mode === "level-success" || game.mode === "level-failure") {
+            // 从右到左平移整块画布
+            // 显示游戏结束界面
+        }
     },
     
     animate: function() {
@@ -76,6 +157,7 @@ const game = {
         // 初始化
         levels.init();
         loader.init();
+        mouse.init();
 
         // 隐藏所有游戏界面，显示开始界面
         game.hideScreens();
@@ -240,6 +322,48 @@ const loader = {
                 loader.onload = undefined;
             }
         }
+    }
+}
+
+const mouse = {
+    x: 0,
+    y: 0,
+    down: false,
+    dragging: false,
+
+    init: function() {
+        const canvas = document.getElementById('gameCanvas');
+
+        canvas.addEventListener("mousemove", mouse.mouseMoveHandler, false);
+        canvas.addEventListener("mousedown", mouse.mouseDownHandler, false);
+        canvas.addEventListener("mouseup", mouse.mouseUpHandler, false);
+        canvas.addEventListener("mouseout", mouse.mouseOutHandler, false);        
+    },
+
+    mouseMoveHandler: function(ev) {
+        const offset = game.canvas.getBoundingClientRect();
+
+        mouse.x = ev.clientX - offset.left;
+        mouse.y = ev.clientY - offset.top;
+
+        if (mouse.down) {
+            mouse.dragging = true;
+        }
+
+        ev.preventDefault();
+    },
+
+    mouseDownHandler: function(ev) {
+        mouse.down = true;
+
+        ev.preventDefault();
+    },
+
+    mouseUpHandler: function(ev) {
+        mouse.down = false;
+        mouse.dragging = false;
+
+        ev.preventDefault();
     }
 }
 
