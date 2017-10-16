@@ -1,0 +1,95 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    font-family: Roboto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#weather {
+    width: 600px;
+    height: 330px;
+    box-shadow: 20px 20px 20px 0px rgba(52, 62, 61, 0.5);
+    display: flex;
+    flex-flow: column;
+}
+
+#weather .show {
+    flex: 6;
+    display: flex;
+}
+
+#weather .show .image {
+    flex: 1;
+    background: url('https://cdn.dribbble.com/users/658839/screenshots/2015006/city-illustration.png') no-repeat;
+    background-size: cover;
+    position: relative;
+}
+
+#weather .show .overlay {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(52, 62, 61, 0.5);
+    opacity: 0.5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: none;
+}
+
+.overlay .spin {
+    animation: spin 1.25s ease alternate infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+#weather .show .details {
+    flex: 1;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.details span {
+    display: block;
+    margin: 10px;
+}
+
+.temp .value {
+    font-size: 52px;
+    font-weight: 500;
+}
+
+#weather .search {
+    flex: 1;
+    outline: none;
+    border: none;
+    text-align: center;
+    font-size: 16px;
+}
+
+#weather hr {
+    width: 140px;
+    transition: width 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+#weather .search:focus ~ hr {
+    width: 180px;
+    transition: width 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);    
+}
