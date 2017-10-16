@@ -79,6 +79,25 @@ const game = {
         }
     },
 
+    // 遍历游戏中剩余的所有角色和敌人，将它们的Box2D实体存储起来
+    heroes: undefined,
+    villains: undefined,
+    countHeroesAndVillains: function() {
+        game.heroes = [];
+        game.villains = [];
+        for (let body = box2d.world.GetBodyList(); body; body = body.GetNext()) {
+            let entity = body.GetUserData();
+
+            if (entity) {
+                if (entity.type === 'hero') {
+                    game.heroes.push(body);
+                } else if (entity.type === 'villain') {
+                    game.villains.push(body);
+                }
+            }
+        }
+    },
+
     handleGameLogic: function() {
         if (game.mode === "intro") {
             if (game.panTo(700)) {
@@ -96,10 +115,41 @@ const game = {
 
         if (game.mode === "load-next-hero") {
             // 首先先计算角色和敌人数量，并将它们放进各自的数组中
+            game.countHeroesAndVillains();
             // 检查敌人是否还有存活，如果没有，过关
+            if (game.villains.length === 0) {
+                game.mode = "level-success";
+                return;
+            }
             // 检查是否还有更多的角色等待加载，如果没有，失败
+            if (game.heroes.length === 0) {
+                game.mode = "level-failure";
+                return;
+            }
             // 加载角色，设置游戏状态
-            game.mode = "wait-for-firing";
+            if (!game.currentHero) {
+                // 选择数组中的最后一个
+                game.currentHero = game.heroes[game.heroes.length - 1];
+
+                // 加载角色的初始坐标
+                const heroStartX = 180;
+                const heroStartY = 180;
+
+                // 将其放置在弹弓的上方
+                game.currentHero.SetPosition({x: heroStartX / box2d.scale, y: heroStartY / box2d.scale});
+                game.currentHero.SetLinearVelocity({x: 0, y: 0});
+                game.currentHero.SetAngularVelocity(0);
+
+                // 激活角色
+                game.currentHero.SetAwake(true);
+            } else {
+                // 等待其休眠
+                game.panTo(game.slingshotX);
+
+                if (!game.currentHero.IsAwake()) {
+                    game.mode = "wait-for-firing";
+                }
+            }
         }
 
         if (game.mode === "firing") {
@@ -119,6 +169,19 @@ const game = {
     },
     
     animate: function() {
+
+        // 使物体动起来
+        const currentTime = new Date().getTime();
+
+        if (game.lastUpdateTime) {
+            const timeStep = (currentTime - game.lastUpdateTime) / 1000;
+
+            box2d.step(timeStep);
+        }
+
+        game.lastUpdateTime = currentTime;
+
+
         // 处理平移，游戏状态和控制流程
         game.handleGameLogic();
 
@@ -702,6 +765,17 @@ const box2d = {
 
         return body;
     },
+
+    step: function(timeStep) {
+
+        if (timeStep > 1 / 30) {
+            timeStep = 1 / 30;
+        }
+
+        // 垂直加速度： 8
+        // 水平加速度： 3
+        box2d.world.Step(timeStep, 8, 3);
+    }
 }
 
 window.addEventListener('load', () => {
