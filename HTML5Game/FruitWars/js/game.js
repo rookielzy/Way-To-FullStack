@@ -33,6 +33,8 @@ const game = {
         game.ended = false;
 
         game.animationFrame = window.requestAnimationFrame(game.animate, game.canvas);
+
+        game.startBackgroundMusic();
     },
 
     // 平移画布，使其根据角色进行居中
@@ -155,17 +157,119 @@ const game = {
         if (game.mode === "firing") {
             // 如果如果按住鼠标，允许调整发射角度
             // 释放鼠标，发射角色
+            if (mouse.down) {
+                game.panTo(game.slingshotX);
+
+                // 弹弓角度
+                let distance = Math.pow(Math.pow(mouse.x - game.slingshotBandX + game.offsetLeft, 2) + Math.pow(mouse.y - game.slingshotBandY, 2), 0.5);
+                let angle = Math.atan2(mouse.y - game.slingshotBandY, mouse.x - game.slingshotBandX);
+
+                const minDragDistance = 10;
+                const maxDragDistance = 120;
+                const maxAngle = Math.PI * 145 / 180;
+
+                if (angle > 0 && angle < maxAngle ) {
+                    angle = maxAngle;
+                }
+                if (angle < 0 && angle > -maxAngle ) {
+                    angle = -maxAngle;
+                }
+                // 如果角色被拉太远，取消拉扯
+                if (distance > maxDragDistance) {
+                    distance = maxDragDistance;
+                }
+
+                // 如果角色拉措角度，取消拉扯
+                if ((mouse.x + game.offsetLeft > game.slingshotBandX)) {
+                    distance = minDragDistance;
+                    angle = Math.PI;
+                }
+
+                // 设置角色位置
+                game.currentHero.SetPosition({ x: (game.slingshotBandX + distance * Math.cos(angle) + game.offsetLeft) / box2d.scale,
+                    y: (game.slingshotBandY + distance * Math.sin(angle)) / box2d.scale });
+
+            } else {
+                game.mode = "fired";
+                var impulseScaleFactor = 0.8;
+                var heroPosition = game.currentHero.GetPosition();
+                var heroPositionX = heroPosition.x * box2d.scale;
+                var heroPositionY = heroPosition.y * box2d.scale;
+
+                var impulse = new b2Vec2((game.slingshotBandX - heroPositionX) * impulseScaleFactor,
+                    (game.slingshotBandY - heroPositionY) * impulseScaleFactor);
+
+                // Apply an impulse to the hero to fire him towards the target
+                game.currentHero.ApplyImpulse(impulse, game.currentHero.GetWorldCenter());
+
+                // Make sure the hero can't keep rolling indefinitely
+                game.currentHero.SetAngularDamping(2);
+
+                // Play the slingshot released sound
+                game.slingshotReleasedSound.play();
+            }
         }
 
         if (game.mode === "fired") {
             // 移动角色
             // 等待角色停止移动或超出边界
+            const heroX = game.currentHero.GetPosition().x * box2d.scale;
+
+            game.panTo(heroX);
+
+            // 等待角色运动停止
+            if (!game.currentHero.IsAwake() || heroX < 0 || heroX > game.currentLevel.foregroundImage.width) {
+                // 移除角色
+                box2d.world.DestroyBody(game.currentHero);
+                game.currentHero = undefined;
+                // 加载下一个角色
+                game.mode = "load-next-hero";
+            }
         }
 
         if (game.mode === "level-success" || game.mode === "level-failure") {
             // 从右到左平移整块画布
             // 显示游戏结束界面
+            if (game.panTo(0)) {
+                // 游戏结束
+                game.ended = true;
+                game.showEndingScreen();
+            }
         }
+
+        // 加载角色
+        if (!game.currentHero) {
+            game.currentHero = game.heroes[game.heroes.length - 1];
+
+            const heroStartX = 180;
+            const heroStartY = 180;
+
+            game.currentHero.SetPosition({ x: heroStartX / box2d.scale, y: heroStartY / box2d.scale });
+            game.currentHero.SetLinearVelocity({ x: 0, y: 0 });
+            game.currentHero.SetAngularVelocity(0);
+
+            game.currentHero.SetAwake(true);
+        } else {
+            game.panTo(game.slingshotX);
+            if (!game.currentHero.IsAwake()) {
+                game.mode = "wait-for-firing";
+            }
+        }
+    },
+
+    mouseOnCurrentHero: function() {
+        if (!game.currentHero) {
+            return false;
+        }
+
+        const position = game.currentHero.GetPosition();
+
+        const distanceSquared = Math.pow(position.x * box2d.scale - mouse.x - game.offsetLeft, 2) +
+            Math.pow(position.y * box2d.scale - mouse.y, 2);
+
+        const radiusSquared = Math.pow(game.currentHero.GetUserData().radius, 2);
+
+        return (distanceSquared <= radiusSquared);
     },
     
     animate: function() {
@@ -241,15 +345,63 @@ const game = {
         mouse.init();
 
         // 隐藏所有游戏界面，显示开始界面
-        game.hideScreens();
-        game.showScreen("gameStartScreen");
+        game.loadSounds(function() {
+            game.hideScreens();
+            game.showScreen("gameStartScreen");
+        })
+    },
+
+    loadSounds: function(onload) {
+        game.backgroundMusic = loader.loadSound("audio/gurdonark-kindergarten");
+
+        game.slingshotReleasedSound = loader.loadSound("audio/released");
+        game.bounceSound = loader.loadSound("audio/bounce");
+        game.breakSound = {
+            "glass": loader.loadSound("audio/glassbreak"),
+            "wood": loader.loadSound("audio/woodbreak")
+        };
+
+        loader.onload = onload;
+    },
+
+    startBackgroundMusic: function() {
+        game.backgroundMusic.play();
+        game.setBackgroundMusicButton();
+    },
+
+    stopBackgroundMusic: function() {
+        game.backgroundMusic.pause();
+        // Go to the beginning of the song
+        game.backgroundMusic.currentTime = 0;
+
+        game.setBackgroundMusicButton();
+    },
+
+    toggleBackgroundMusic: function() {
+        if (game.backgroundMusic.paused) {
+            game.backgroundMusic.play();
+        } else {
+            game.backgroundMusic.pause();
+        }
+
+        game.setBackgroundMusicButton();
+    },
+
+    setBackgroundMusicButton: function() {
+        const toggleImage = document.getElementById("togglemusic");
+
+        if (game.backgroundMusic.paused) {
+            toggleImage.src = "images/icons/nosound.png";
+        } else {
+            toggleImage.src = "images/icons/sound.png";
+        }
     },
 
     hideScreens: function() {
         const screens = document.getElementsByClassName("gameLayer");
         // 循环所有界面，将它们设置为 none
         for (let i = screens.length - 1; i >= 0; i--) {
-            const screen = screens[i];
+            let screen = screens[i];
 
             screen.style.display = "none";
         }
@@ -266,11 +418,40 @@ const game = {
         game.showScreen("levelSelectScreen");
     },
 
+    restartLevel: function() {
+        window.cancelAnimationFrame(game.animationFrame);
+        game.lastUpdateTime = undefined;
+        levels.load(game.currentLevel.number);
+    },
+
     showScreen: function(id) {
         const screen = document.getElementById(id);
 
         screen.style.display = "block";
-    }
+    },
+
+    showEndingScreen: function() {
+        const playNextLevel = document.getElementById("playNextLevel");
+        const endingMessage = document.getElementById("endingMessage");
+
+        if (game.mode === "level-success") {
+            if (game.currentLevel.number < levels.data.length - 1) {
+                endingMessage.innerHTML = "Level Complete. Well Done!!!";
+                // 更多关卡
+                playNextLevel.style.display = "block";
+            } else {
+                endingMessage.innerHTML = "All Levels Complete. Well Done!!!";
+                // 通关
+                playNextLevel.style.display = "none";
+            }
+        } else if (game.mode === "level-failure") {
+            endingMessage.innerHTML = "Failed. Play Again?";
+            // 失败
+            playNextLevel.style.display = "none";
+        }
+
+        game.showScreen("endingScreen");
+    },
 };
 
 const levels = {
