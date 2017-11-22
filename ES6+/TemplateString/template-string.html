@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        .hl {
+            color: #ff0000;  
+        }
+    </style>
+    <title>Template String</title>
+</head>
+<body>
+    
+    <script>
+    // const name = "Jet";
+    // const age = 24;
+
+    // function highlight(strings, ...values) {
+    //     let str = '';
+    //     strings.forEach((string, i) => {
+    //         str += `${string} <span class="hl">${values[i] || ''}</span>`;
+    //     })
+    //     return str;
+    // }
+
+    // const sentence = highlight`My name is ${name}, I am a Web Developer, I am ${age} years old.`;
+    // document.body.innerHTML = sentence;
+
+    const name = "Jet";
+    const age = 24;
+    const dict = {
+        HTML: "Hyper Text Markup Language",
+        CSS: "Cascading Style Sheets",
+        JS: "JavaScript"
+    };
+    function addAbbreviations(strings, ...values) {
+        const abbreviated = values.map(value => {
+            if (dict[value]) {
+                return `<abbr title="${dict[value]}">${value}</abbr>`;
+            }
+            return value;
+        })
+        return strings.reduce((sentence, string, i) => {
+            return `${sentence}${string}${abbreviated[i] || ''}`
+        }, '');
+    }
+
+    const sentence = addAbbreviations`My name is ${name}, I am a Web Developer, I am ${age} years old.  I love ${'HTML'}, ${'CSS'}, ${'JS'}.`;
+    document.body.innerHTML = sentence;
+    </script>
+</body>
+</html>
