@@ -91,3 +91,53 @@ Dog.info(); // All Dogs Are Real Good God
 const dog = new Dog('Jet');
 dog.info(); // Uncaught TypeError: dog.info is not a function
 ```
+
+既然说到了类，就离不开继承这个概念了。在`Class`中，我们可以通过`extends`关键字来实现继承。
+
+```js
+class Entity {
+    constructor(name, hp) {
+        this.name = name;
+        this.hp = hp;
+    }
+
+    sayHi() {
+        console.log(`Hi, I am ${this.name}`);
+    }
+}
+
+class Player extends Entity {
+    constructor(name, hp, type) {
+        super(name, hp);    // 调用父类的constructor
+        this.type = type;
+    }
+
+    attack() {
+        console.log('Attck Emeny');
+    }
+}
+
+class Emeny extends Entity {
+    constructor(name, hp, damage) {
+        super(name, hp);
+        this.damage = damage;
+    }
+
+    fire() {
+        console.log('Using Fire Magic');
+    }
+}
+
+class Wrong extends Entity {
+    constructor(wrong) {
+        this.wrong = wrong; // 报错，必须调用父类的constructor
+        super();
+        this.wrong = wrong; // OK
+    }
+}
+
+const player1 = new Player("p1", 10, "warrior");
+const boss = new Emeny("boss", 100, 5);
+```
+
+我们可以注意到，继承中，我们必须通过`super`函数来调用父类的`constructor`。
