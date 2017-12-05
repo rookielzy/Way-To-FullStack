@@ -11,5 +11,13 @@ db.once('open', ()  => {
     })
     
     const Test = mongoose.model('TestMongoDB', testSchema)
-    console.log(Test)
+    
+    const test = new Test({ name: 'test' })
+    test.save((err, test) => {
+        if (err) {
+            console.error(err)
+        } else {
+            console.log('save success')
+        }
+    })
 })
