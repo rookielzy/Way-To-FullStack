@@ -1,7 +1,7 @@
 <template>
-    <aside>
-        <p>thing!</p>
-    </aside>
+  <aside>
+    <p>thing!</p>
+  </aside>
 </template>
 
 <script>
@@ -10,9 +10,9 @@ export default {}
 
 <style scoped>
 aside {
-    background: #fff;
-    height: 90vh;
-    grid-column: 1;
-    grid-row: 1 / 3;
+  background: #fff;
+  height: 90vh;
+  width: 250px;
+  float: left;
 }
 </style>
