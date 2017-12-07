@@ -17,4 +17,5 @@
 
 
 ## 进度
-1. 阅读Mongoose文档
+1. 阅读Mongoose文档，连接MongoDB数据库
+2. 创建Collection，增加数据
