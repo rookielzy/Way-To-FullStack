@@ -11,6 +11,13 @@ export default new Router({
       component: (resolve) => {
         require(['@/views/home'], resolve)
       }
+    },
+    {
+      path: '/button',
+      name: 'button',
+      component: (resolve) => {
+        require(['@/views/button'], resolve)
+      }
     }
   ]
 })

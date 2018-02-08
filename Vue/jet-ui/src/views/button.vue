@@ -1,11 +1,11 @@
 <template>
   <div>
-    <router-link to="/button">Button</router-link>
+    <JETButton>Default Button</JETButton>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'home'
+  name: 'button'
 }
 </script>
