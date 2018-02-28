@@ -1,43 +1,40 @@
 class _Promise {
-  constructor (fn) {
-    const _this = this
-    _this.__queue = []
+  constructor(excuseFunc) {
+    this.promiseQueue = []
+    this.handleError = () => {}
+    this.onResolve = this.onResolve.bind(this)
+    this.onReject = this.onReject.bind(this)    
 
-    _this.__succ_res = null
-    _this.__erro_res = null
-
-    _this.status = ''
-
-    fn (function (...arg) {
-      _this.__succ_res = arg
-
-      _this.status = 'succ'
-
-      _this.__queue.forEach(json => {
-        json.resolve(...arg)
-      })
-    }, function (...arg) {
-      _this.__erro_res = arg
-
-      _this.status = 'error'
-
-      _this.__queue.forEach(json => {
-        json.rejecet(...arg)
-      })
-    })
+    excuseFunc(this.onResolve, this.onReject)
   }
 
-  then (resolve, reject) {
-    console.log('Call then method')
-    if (this.status == 'succ') {
-      console.log('success')
-      resolve(...this.__succ_res)
-    } else if (this.status == 'error') {
-      console.log('fail')      
-      reject(...this.__erro_res)
-    } else {
-      console.log('continue')
-      this.__queue.push({resolve, reject})
+  then (onResolve) {
+    // 加入队列，返回this
+    this.promiseQueue.push(onResolve)
+    return this
+  }
+
+  catch (handleError) {
+    // 捕获错误，返回this
+    this.handleError = handleError
+    return this
+  }
+
+  onResolve (value) {
+    let storeValue
+    try {
+      this.promiseQueue.forEach(nextFunc => {
+        storeValue = nextFunc(value)
+      })
+    } catch (error) {
+      this.promiseQueue = []
+
+      this.onReject(error)
     }
+    
+  }
+
+  onReject (error) {
+    this.handleError(error)
   }
 }

@@ -10,20 +10,22 @@
 <body>
   <script>
     let p = new _Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(parseInt(Math.random() * 1000))
-      }, 1000)
-    })
+      let xmlHttp = new XMLHttpRequest()
+      
+      xmlHttp.onreadystatechange = function(e) {
+        if (e.target.status == 200) {
+          if (e.target.readyState == 4) {
+            resolve(e.target.response)
+            console.log('done')
+          }
+        } else {
+          console.log('error')
+        }
+      }
 
-    alert('Promise start working')
-    p.then((num) => {
-      alert(num)
-    }, () => {
-      alert('error')
+      xmlHttp.open('GET', 'https://www.easy-mock.com/mock/58ff34155e43ae5dbea5fada/chart-datas/visit-times')
+      xmlHttp.send()
     })
-
-    alert('Promise end working')
-    
   </script>
 </body>
 </html>
