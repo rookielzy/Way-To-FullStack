@@ -4,27 +4,60 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <script src="promise.js"></script>
+  <script src="./promise.js"></script>
   <title>Promise</title>
 </head>
 <body>
   <script>
-    let p = new _Promise((resolve, reject) => {
-      let xmlHttp = new XMLHttpRequest()
-      
-      xmlHttp.onreadystatechange = function(e) {
-        if (e.target.status == 200) {
-          if (e.target.readyState == 4) {
-            resolve(e.target.response)
-            console.log('done')
-          }
-        } else {
-          console.log('error')
-        }
-      }
 
-      xmlHttp.open('GET', 'https://www.easy-mock.com/mock/58ff34155e43ae5dbea5fada/chart-datas/visit-times')
-      xmlHttp.send()
+    fakeApiBackend = () => {
+      const user = {
+        username: 'rookielzy',
+        favoriteNumber: 21,
+        profile: 'https://github.com/rookielzy'
+      };
+
+      // Introduce a randomizer to simulate the
+      // the probability of encountering an error
+      if (Math.random() > .05) {
+        return {
+          data: user,
+          statusCode: 200,
+        };
+      } else {
+        const error = {
+          statusCode: 404,
+          message: 'Could not find user',
+          error: 'Not Found',
+        };
+
+        return error;
+      }
+    };
+
+    let p = new _Promise((resolve, reject) => {
+      setTimeout(() => {
+        const apiResponse = fakeApiBackend();
+
+        if (apiResponse.statusCode >= 400) {
+          reject(apiResponse);
+        } else {
+          resolve(apiResponse.data);
+        }
+      }, 5000);
+    })
+
+    p.then((res) => {
+      const user = res
+      console.log('User Data: ', user)
+      return user
+    }).then((res) => {
+      const { profile } = res
+      console.log('User Profile: ', profile)
+    }).catch((error) => {
+      console.error(error.message)
+    }).finally(() => {
+      console.log('All works Have Been Done')
     })
   </script>
 </body>

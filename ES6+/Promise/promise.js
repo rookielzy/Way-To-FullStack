@@ -2,10 +2,12 @@ class _Promise {
   constructor(excuseFunc) {
     this.promiseQueue = []
     this.handleError = () => {}
+    this.handleFinsh = () => {}
     this.onResolve = this.onResolve.bind(this)
     this.onReject = this.onReject.bind(this)    
+    this.onFinally = this.onFinally.bind(this)
 
-    excuseFunc(this.onResolve, this.onReject)
+    excuseFunc(this.onResolve, this.onReject, this.onFinally)
   }
 
   then (onResolve) {
@@ -20,8 +22,13 @@ class _Promise {
     return this
   }
 
+  finally (handleFinsh) {
+    this.handleFinsh = handleFinsh
+    return this
+  }
+
   onResolve (value) {
-    let storeValue
+    let storeValue = value
     try {
       this.promiseQueue.forEach(nextFunc => {
         storeValue = nextFunc(value)
@@ -31,10 +38,15 @@ class _Promise {
 
       this.onReject(error)
     }
-    
+
+    this.onFinally()
   }
 
   onReject (error) {
     this.handleError(error)
+  }
+
+  onFinally () {
+    this.handleFinsh()
   }
 }
