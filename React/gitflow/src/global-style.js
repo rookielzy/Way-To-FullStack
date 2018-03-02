@@ -1,4 +1,4 @@
-import { injectGlobal } from 'styled-components'
+import styled, { injectGlobal } from 'styled-components'
 
 injectGlobal`
   html, body, div, span, applet, object, iframe,
@@ -44,4 +44,11 @@ injectGlobal`
     border-collapse: collapse;
     border-spacing: 0;
   }
+`
+export const FlowName = styled.h2`
+  font-weight: bold;
+  font-size: 1.2rem;
+`
+
+export const Button = styled.button`
 `
