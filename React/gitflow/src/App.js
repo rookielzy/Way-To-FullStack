@@ -6,10 +6,11 @@ import GitFlow from './gitflow'
 const DEVELOP = 'develop'
 const MASTER = 'master'
 
-const seedData = () => {
-  const masterID = shortid.generate()
-  const developID = shortid.generate()
+const masterID = shortid.generate()
+const developID = shortid.generate()
 
+const seedData = () => {
+  
   const commits = [
     {
       id: shortid.generate(),
@@ -99,11 +100,33 @@ class App extends Component {
 
   }
 
+  handleMerge = (sourceBranchID, targetBranchID = developID) => {
+    const { branches, commits } = this.state.project
+    const sourceCommits = commits.filter(c => c.branch === sourceBranchID)
+    const targetCommits = commits.filter(c => c.branch === targetBranchID)
+
+    const lastSourceCommit = sourceCommits[sourceCommits.length - 1]
+    const lastTargetCommit = targetCommits[targetCommits.length - 1]
+
+    const mergeCommit = {
+      id: shortid.generate(),
+      branch: targetBranchID,
+      gridIndex: Math.max(lastSourceCommit.gridIndex, lastTargetCommit.gridIndex) + 1
+    }
+
+    commits.push(mergeCommit)
+
+    this.setState({
+      commits
+    })
+  }
+
   render() {
     return (
       <AppElm>
         <GitFlow
           project={this.state.project}
+          onMerge={this.handleMerge}
           onCommit={this.handleCommit}
           onNewFeature={this.handleNewFeature}
         />
