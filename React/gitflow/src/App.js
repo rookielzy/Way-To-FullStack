@@ -57,7 +57,6 @@ class App extends Component {
   handleCommit = (branchID, mergeGridIndex = 0) => {
     let { commits } = this.state.project
     const branchCommits = commits.filter(c => c.branch === branchID)
-    console.log(branchCommits)
     const lastCommit = branchCommits[branchCommits.length - 1]
     commits.push({
       id: shortid.generate(),
@@ -74,8 +73,7 @@ class App extends Component {
     let { branches, commits } = this.state.project
     let featureBranches = branches.filter(b => b.featureBranch)
     let featureBranchName = 'feature ' + ((featureBranches || []).length + 1)
-    let developBranch = branches.find(b => b.name === DEVELOP)
-    let developCommits = commits.filter(c => c.branch === developBranch.id)
+    let developCommits = commits.filter(c => c.branch === developID)
     const lastDevelopCommit = developCommits[developCommits.length - 1]
     let featureOffset = lastDevelopCommit.gridIndex + 1
     let newBranch = {
@@ -100,9 +98,68 @@ class App extends Component {
 
   }
 
+  handleNewRelease = () => {
+    let { branches, commits } = this.state.project
+    let releaseBranches = branches.filter(b => b.releaseBranches)
+    let releaseBranchName = 'release ' + ((releaseBranches || []).length + 1)
+    let developCommits = commits.filter(c => c.branch === developID)
+    const lastDevelopCommit = developCommits[developCommits.length - 1]
+    let releaseOffset = lastDevelopCommit.gridIndex + 1
+    let newBranch = {
+      id: shortid.generate(),
+      name: releaseBranchName,
+      releaseBranch: true,
+      canCommit: true,
+    }
+    let newCommit = {
+      id: shortid.generate(),
+      branch: newBranch.id,
+      gridIndex: releaseOffset,
+    }
+
+    commits.push(newCommit)
+    branches.push(newBranch)
+    this.setState({
+      branches,
+      commits
+    })
+  }
+
+  handleRelease = (sourceBranchID) => {
+    const { branches, commits } = this.state.project
+    const sourceBranch = branches.find(b => b.id === sourceBranchID)
+    const sourceCommits = commits.filter(c => c.branch === sourceBranchID)
+    const masterCommits = commits.filter(c => c.branch === masterID)
+    const developCommits = commits.filter(c => c.branch === developID)
+    const lastSourceCommit = sourceCommits[sourceCommits.length - 1]
+    const lastMasterCommit = masterCommits[masterCommits.length - 1]
+    const lastDevelopCommit = developCommits[developCommits.length - 1]
+
+    const masterMergeCommit = {
+      id: shortid.generate(),
+      branch: masterID,
+      gridIndex: Math.max(lastSourceCommit.gridIndex, lastMasterCommit.gridIndex) + 1
+    }
+
+    const developMergeCommit = {
+      id: shortid.generate(),
+      branch: developID,
+      gridIndex: Math.max(lastSourceCommit.gridIndex, lastDevelopCommit.gridIndex) + 1
+    }
+
+    commits.push(masterMergeCommit, developMergeCommit)
+    sourceBranch.merged = true
+
+    this.setState({
+      branches,
+      commits
+    })
+
+  }
+
   handleMerge = (sourceBranchID, targetBranchID = developID) => {
     const { branches, commits } = this.state.project
-    const sourceBranch = branches.filter(b => b.id === sourceBranchID)[0]
+    const sourceBranch = branches.find(b => b.id === sourceBranchID)
     const sourceCommits = commits.filter(c => c.branch === sourceBranchID)
     const targetCommits = commits.filter(c => c.branch === targetBranchID)
 
@@ -118,7 +175,7 @@ class App extends Component {
     commits.push(mergeCommit)
 
     sourceBranch.merged = true
-    console.log(sourceBranch)
+
     this.setState({
       branches,
       commits
@@ -131,8 +188,10 @@ class App extends Component {
         <GitFlow
           project={this.state.project}
           onMerge={this.handleMerge}
+          onRelease={this.handleRelease}
           onCommit={this.handleCommit}
           onNewFeature={this.handleNewFeature}
+          onNewRelease={this.handleNewRelease}
         />
       </AppElm>
     )

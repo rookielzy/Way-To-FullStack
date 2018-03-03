@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import styled from 'styled-components'
 import { FlowName, Button } from './global-style'
+import { release } from 'os'
 
 const GitFlowElm = styled.div`
 `
@@ -55,23 +56,31 @@ const Commit = styled.li`
 
 class GitFlow extends Component {
 
-  renderBranch = (branch, commits) => {
-    const { featureBranch, merged } = branch
+  renderBranch = (branch) => {
+    const { commits } = this.props.project
+    const { releaseBranch, featureBranch, merged } = branch
+    const branchCommmits = commits.filter(c => c.branch === branch.id)
 
     const mergeButton = featureBranch && !merged ? (
       <Button
-        onClick={this.props.onMerge.bind(this, branch.id, undefined)}
+        onClick={this.props.onMerge.bind(this, branch.id)}
       >Merge</Button>
+    ) : null
+
+    const releaseButton = releaseBranch && !merged ? (
+      <Button
+        onClick={this.props.onRelease.bind(this, branch.id, undefined)}
+      >Release</Button>
     ) : null
 
     return (
       <BranchElm key={'branch-' + branch.id}>
         <BranchName>{branch.name}</BranchName>
         <Button onClick={this.props.onCommit.bind(this, branch.id, 0)}>commit</Button>
-        {mergeButton}      
+        {mergeButton || releaseButton}      
         <Commits>
           {
-            commits.map((commit, idx) => {
+            branchCommmits.map((commit, idx) => {
               return <Commit
                 key={'commit-' + commit.id}
                 color={branch.color}
@@ -86,18 +95,22 @@ class GitFlow extends Component {
 
   render () {
     const { project } = this.props
+    const { branches } = project
+    const masterBranch = branches.find(b => b.name === 'master')
+    const developBranch = branches.find(b => b.name === 'develop')
+    const releaseBranches = branches.filter(b => b.releaseBranch)
+    const featureBranches = branches.filter(b => b.featureBranch)
 
     return (
       <GitFlowElm>
         <FlowName>Git Flow</FlowName>
         <Button onClick={this.props.onNewFeature}>New Feature</Button>
+        <Button onClick={this.props.onNewRelease}>New Release</Button>
         <ProjectElm>
-          {
-            project.branches.map((branch, idx) => {
-              const commits = project.commits.filter(c => c.branch === branch.id)
-              return this.renderBranch(branch, commits)
-            })
-          }
+          {this.renderBranch(masterBranch)}
+          {releaseBranches.map((branch, idx) => this.renderBranch(branch))}
+          {this.renderBranch(developBranch)}
+          {featureBranches.map((branch, idx) => this.renderBranch(branch))}
         </ProjectElm>
       </GitFlowElm>
     )
