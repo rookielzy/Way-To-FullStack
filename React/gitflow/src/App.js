@@ -102,6 +102,7 @@ class App extends Component {
 
   handleMerge = (sourceBranchID, targetBranchID = developID) => {
     const { branches, commits } = this.state.project
+    const sourceBranch = branches.filter(b => b.id === sourceBranchID)[0]
     const sourceCommits = commits.filter(c => c.branch === sourceBranchID)
     const targetCommits = commits.filter(c => c.branch === targetBranchID)
 
@@ -116,7 +117,10 @@ class App extends Component {
 
     commits.push(mergeCommit)
 
+    sourceBranch.merged = true
+    console.log(sourceBranch)
     this.setState({
+      branches,
       commits
     })
   }
