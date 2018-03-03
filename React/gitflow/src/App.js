@@ -71,7 +71,7 @@ class App extends Component {
 
   handleNewFeature = () => {
     let { branches, commits } = this.state.project
-    let featureBranches = branches.filter(b => !!b.featureBranches)
+    let featureBranches = branches.filter(b => b.featureBranch)
     let featureBranchName = 'feature ' + ((featureBranches || []).length + 1)
     let developBranch = branches.find(b => b.name === DEVELOP)
     let developCommits = commits.filter(c => c.branch === developBranch.id)
