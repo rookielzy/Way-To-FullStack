@@ -2,15 +2,19 @@
 
 Git Flow 工作流。
 
-首先，一个Git Flow 的项目，应该有两大分支：`master`分支和`develop`分支。次分支：`new feature`分支和`hot fix`分支。其中`develop`分支的更新时间线一定不能慢于`master`分支。
+首先，一个Git Flow 的项目，应该有两大分支：`master`分支和`develop`分支。次分支：`release`、`new feature`分支和`hot fix`分支。其中`develop`分支的更新时间线一定不能慢于`master`分支。
 
 >* `master branch`
 
-主分支，一般也作为release（发版）分支。这个分支为稳定状态分支，与线上环境同步。此分支不允许做`commit`操作。只允许进行`merge`，`hot fix`的操作。
+主分支，一般作为稳定状态分支，与线上环境同步。此分支不允许做`commit`操作。只允许进行`merge`，`hot fix`的操作。
 
 >* `develop branch`
 
 开发分支，顾名思义也就是同步开发过程中的分支。一般也代表了测试完毕后的状态。在项目的每个迭代周期时，将会合并到`master branch`上。
+
+>* `release branch`
+
+发行分支，此分支由`develop branch`生成，仅允许`commit`的操作。在测试通过后，以`Pull Request`的形式合并到`master branch`和`develop branch`上。合并通过后，此分支将只允许删除操作。
 
 >* `new feature`
 
