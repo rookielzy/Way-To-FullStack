@@ -51,4 +51,25 @@ export const FlowName = styled.h2`
 `
 
 export const Button = styled.button`
+  border: none;
+  background: transparent;
+  border: 1px solid #2196f3;
+  color: #2196f3;
+  padding: 10px;
+`
+
+export const ButtonIcon = styled.button`
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: 1px solid #2196f3;
+  color: #2196f3;
+  border-radius: 50%;
+`
+
+export const FlowActions = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-column-gap: 10px;
+  margin-top: 10px;
 `
