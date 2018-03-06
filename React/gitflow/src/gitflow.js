@@ -18,7 +18,6 @@ const GridColumn = styled.div`
   position: relative;
   display: grid;
   grid-template-columns: ${p => `repeat(${p.count || 2}, 90px)`};
-
 `
 
 const BranchHeader = styled.div`
@@ -29,13 +28,13 @@ const BranchHeader = styled.div`
   z-index: 1;
 
   &:nth-child(even) {
-    background-color: #f7f7f7;
+      background-color: #f7f7f7;
   }
 `
 
 const BranchActions = styled.div`
   display: grid;
-  grid-template-columns: ${p => `repeat(${p.count || 1}, 1fr`};
+  grid-template-columns: ${p => `repeat(${p.count || 1}, 1fr)`};
   margin-top: 10px;
   justify-items: center;
   height: 24px;
@@ -75,9 +74,9 @@ const Commit = styled.li`
   width: 25px;
   height: 25px;
   border-radius: 50%;
+  transform: translate(-50%, 0);
   background-color: ${p => p.color || '#9d9d9d'};
   border: 2px solid #333;
-  transform: translateX(-50%, 0);
   animation: ${fallDownAnimation} cubic-bezier(0.770, 0.000, 0.175, 1.000) 1s;
   animation-fill-mode: forwards;
   z-index: 20;
