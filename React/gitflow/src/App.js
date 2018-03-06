@@ -16,11 +16,13 @@ const seedData = () => {
       id: shortid.generate(),
       branch: masterID,
       gridIndex: 1,
+      parents: null,
     },
     {
       id: shortid.generate(),
       branch: developID,
       gridIndex: 1,
+      parents: null,
     },
   ]
 
@@ -61,7 +63,8 @@ class App extends Component {
     commits.push({
       id: shortid.generate(),
       branch: branchID,
-      gridIndex: lastCommit.gridIndex + mergeGridIndex + 1
+      gridIndex: lastCommit.gridIndex + mergeGridIndex + 1,
+      parents: [lastCommit.id],
     })
 
     this.setState({
@@ -87,6 +90,7 @@ class App extends Component {
       id: shortid.generate(),
       branch: newBranch.id,
       gridIndex: featureOffset,
+      parents: [lastDevelopCommit.id],
     }
 
     commits.push(newCommit)
@@ -140,13 +144,15 @@ class App extends Component {
     const masterMergeCommit = {
       id: shortid.generate(),
       branch: masterID,
-      gridIndex: Math.max(lastSourceCommit.gridIndex, lastMasterCommit.gridIndex) + 1
+      gridIndex: Math.max(lastSourceCommit.gridIndex, lastMasterCommit.gridIndex) + 1,
+      parents: [lastMasterCommit.id, lastSourceCommit.id],
     }
 
     const developMergeCommit = {
       id: shortid.generate(),
       branch: developID,
-      gridIndex: Math.max(lastSourceCommit.gridIndex, lastDevelopCommit.gridIndex) + 1
+      gridIndex: Math.max(lastSourceCommit.gridIndex, lastDevelopCommit.gridIndex) + 1,
+      parents: [lastDevelopCommit.id, lastSourceCommit.id]
     }
 
     commits.push(masterMergeCommit, developMergeCommit)
@@ -171,7 +177,8 @@ class App extends Component {
     const mergeCommit = {
       id: shortid.generate(),
       branch: targetBranchID,
-      gridIndex: Math.max(lastSourceCommit.gridIndex, lastTargetCommit.gridIndex) + 1
+      gridIndex: Math.max(lastSourceCommit.gridIndex, lastTargetCommit.gridIndex) + 1,
+      parents: [lastSourceCommit.id, lastTargetCommit.id],
     }
 
     commits.push(mergeCommit)

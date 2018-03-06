@@ -1,8 +1,10 @@
 import React, { Component } from 'react'
+import ReactDOM from 'react-dom'
 import styled from 'styled-components'
 import { ButtonIcon, fallDownAnimation } from './global-style'
 import { release } from 'os'
 import GoeyFilter from './goey-filter'
+import Connections from './connections'
 
 const GitFlowElm = styled.div`
 `
@@ -50,14 +52,13 @@ const BranchName = styled.h4`
 
 const Commits = styled.ol`
   position: relative;
-  margin-top: 20px;
   min-height: 500px;
   filter: url('#goo');
   z-index: 20;
   
   &:before {
     position: absolute;
-    display: block;
+    display: none;
     content: '';
     height: 100%;
     border: 1px dashed ${p => p.color || '#000'};
@@ -74,7 +75,7 @@ const Commit = styled.li`
   width: 25px;
   height: 25px;
   border-radius: 50%;
-  transform: translate(-50%, 0);
+  transform: translate(-50%, -45px);
   background-color: ${p => p.color || '#9d9d9d'};
   border: 2px solid #333;
   animation: ${fallDownAnimation} cubic-bezier(0.770, 0.000, 0.175, 1.000) 1s;
@@ -82,7 +83,7 @@ const Commit = styled.li`
   z-index: 20;
 `
 
-const Connections = styled.svg`
+const ConnectionsContainer = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -92,6 +93,47 @@ const Connections = styled.svg`
 `
 
 class GitFlow extends Component {
+
+  componentWillMount () {
+    this.commitPositions = {}
+  }
+
+  componentDidMount () {
+    this.connectCommits()
+  }
+
+  componentDidUpdate () {
+    this.connectCommits()
+  }
+
+  cacheConnectionsContainer = (elm) => {
+    this.connectionsContainer = elm
+  }
+
+  storeCommitPosition = (id, offset = 0, commitElm) => {
+    if (commitElm) {
+      this.commitPositions[id] = {
+        top: commitElm.offsetTop,
+        left: (offset * 90) + commitElm.offsetLeft
+      }
+    }
+  }
+
+  connectCommits = () => {
+    const { commits } = this.props.project
+    let paths = commits.map(commit => {
+      const { parents } = commit
+      const tgtPosition = this.commitPositions[commit.id]
+      return (parents || []).map(p => {
+        return {
+          src: this.commitPositions[p],
+          tgt: tgtPosition
+        }
+      })
+    })
+    paths = [].concat.apply([], paths)
+    ReactDOM.render(<Connections paths={paths}/>, this.connectionsContainer)
+  }
 
   renderCommitButton = (branch) => {
     return (
@@ -166,7 +208,6 @@ class GitFlow extends Component {
       featureBranches,
       noOfBranches
     } = param
-    console.log(param)
     return (
       <GridColumn
         count={noOfBranches}
@@ -179,7 +220,7 @@ class GitFlow extends Component {
     )
   }
 
-  renderBranchCommit = (branch) => {
+  renderBranchCommit = (branch, branchIndex) => {
     const { commits } = this.props.project
     const branchCommits = commits.filter(c => c.branch === branch.id)
 
@@ -191,9 +232,7 @@ class GitFlow extends Component {
         {
           branchCommits.map(commit => {
             return <Commit
-              innerRef={elm => {
-                console.log(elm && elm.getBoundingClientRect())
-              }}
+              innerRef={this.storeCommitPosition.bind(this, commit.id, branchIndex)}
               key={'commit-' + commit.id}
               color={branch.color}
               top={commit.gridIndex - 1}
@@ -201,14 +240,6 @@ class GitFlow extends Component {
           })
         }
       </Commits>
-    )
-  }
-
-  renderConnections = () => {
-    return (
-      <Connections>
-        <path d="M0,0 C20,0 222,255 397,262" fill={'none'} stroke={'#333'} strokeWidth={2}/>
-      </Connections>
     )
   }
 
@@ -220,16 +251,14 @@ class GitFlow extends Component {
       featureBranches,
       noOfBranches
     } = param
+    let branches = [masterBranch, ...releaseBranches, developBranch, ...featureBranches]
 
     return (
       <GridColumn
         count={noOfBranches}
       >
-        {this.renderBranchCommit(masterBranch)}
-        {releaseBranches.map(branch => this.renderBranchCommit(branch))}
-        {this.renderBranchCommit(developBranch)}
-        {featureBranches.map(branch => this.renderBranchCommit(branch))}
-        {this.renderConnections()}
+        {branches.map((branch, index)=> this.renderBranchCommit(branch, index))}
+        <ConnectionsContainer innerRef={this.cacheConnectionsContainer}/>
       </GridColumn>
     )
   }
