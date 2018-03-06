@@ -81,6 +81,7 @@ class App extends Component {
       name: featureBranchName,
       featureBranch: true,
       canCommit: true,
+      color: '#64B5F6',
     }
     let newCommit = {
       id: shortid.generate(),
@@ -100,7 +101,7 @@ class App extends Component {
 
   handleNewRelease = () => {
     let { branches, commits } = this.state.project
-    let releaseBranches = branches.filter(b => b.releaseBranches)
+    let releaseBranches = branches.filter(b => b.releaseBranch)
     let releaseBranchName = 'release ' + ((releaseBranches || []).length + 1)
     let developCommits = commits.filter(c => c.branch === developID)
     const lastDevelopCommit = developCommits[developCommits.length - 1]
@@ -110,6 +111,7 @@ class App extends Component {
       name: releaseBranchName,
       releaseBranch: true,
       canCommit: true,
+      color: '#81C784',
     }
     let newCommit = {
       id: shortid.generate(),
@@ -149,7 +151,8 @@ class App extends Component {
 
     commits.push(masterMergeCommit, developMergeCommit)
     sourceBranch.merged = true
-
+    console.log(commits, branches)
+    debugger
     this.setState({
       branches,
       commits
@@ -165,7 +168,6 @@ class App extends Component {
 
     const lastSourceCommit = sourceCommits[sourceCommits.length - 1]
     const lastTargetCommit = targetCommits[targetCommits.length - 1]
-
     const mergeCommit = {
       id: shortid.generate(),
       branch: targetBranchID,

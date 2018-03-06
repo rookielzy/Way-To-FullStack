@@ -1,4 +1,4 @@
-import styled, { injectGlobal } from 'styled-components'
+import styled, { injectGlobal, keyframes } from 'styled-components'
 
 injectGlobal`
   html, body, div, span, applet, object, iframe,
@@ -44,6 +44,20 @@ injectGlobal`
     border-collapse: collapse;
     border-spacing: 0;
   }
+  
+  html {
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+
+  body {
+      background-color: #fff;
+      color: #3d3d3d;
+      font-family: 'Open Sans', sans-serif;
+      font-size: 1em;
+  }
 `
 export const FlowName = styled.h2`
   font-weight: bold;
@@ -72,4 +86,10 @@ export const FlowActions = styled.div`
   grid-template-columns: 1fr 1fr;
   grid-column-gap: 10px;
   margin-top: 10px;
+`
+
+export const fallDownAnimation = keyframes`
+  to {
+    transform: translate(-50%, 45px);
+  }
 `
