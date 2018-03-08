@@ -4,30 +4,8 @@
         <title>Way To Full Stack</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <script src="./jssdk.js"></script>
     </head>
     <body>
         Hello World !
-        <button id="clickBtn">Click</button>
-        <script>
-            wx.config({
-                debug: true,
-                appId: 'wxe02218f6f94f2c22',
-                timestamp: '1520496511',
-                nonceStr: 'a7ao8ql3fhe',
-                signature: '061c85aeeb0e2674d8034a3abf444434a22492fb',
-                jsApiList: [
-                    'checkJSApi',
-                    'scanQRCode',
-                    'chooseImage'
-                ]
-            })
-
-            const clickBtn = document.querySelector('#clickBtn')
-
-            clickBtn.addEventListener('click', function() {
-            wx.scanQRCode()
-            })
-        </script>
     </body>
 </html>
