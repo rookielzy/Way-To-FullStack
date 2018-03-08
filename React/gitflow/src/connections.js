@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 
 const ConnectionElm = styled.svg`
   position: absolute;
@@ -9,6 +9,26 @@ const ConnectionElm = styled.svg`
   height: 100%;
   z-index: 10;
 `
+
+const draw = keyframes`
+  to {
+    stroke-dashoffet: 0;
+  }
+`
+
+const AnimatedLine = styled.line`
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  animation: ${draw} 2s linear forwards;
+`
+
+const AnimatedPath = styled.path`
+  stroke-dasharray: 500;
+  stroke-dashoffset: 500;
+  animation: ${draw} 2s linear forwards;
+`
+
+const LINE_COLOR = '#fff'
 
 export default class Connections extends Component {
   render () {
@@ -21,11 +41,11 @@ export default class Connections extends Component {
             let elm = null
             
             if (src.left === tgt.left) {
-              elm = <line
+              elm = <AnimatedLine
                 key={'p' + src.left + '-' + src.top + '-' + idx}
                 x1={src.left} y1={src.top + 25} x2={tgt.left} y2={tgt.top}
                 fill={'none'}
-                stroke={'#3d3d3d'}
+                stroke={LINE_COLOR}
                 strokeWidth={2}
               />
             } else {
@@ -33,11 +53,11 @@ export default class Connections extends Component {
               
               if (src.left < tgt.left) {
                 p1 = {
-                  x: src.left,
+                  x: src.left + 12.5,
                   y: src.top + 12.5
                 }
                 p2 = {
-                  x: tgt.left,
+                  x: tgt.left - 12.5,
                   y: tgt.top + 12.5
                 }
                 c1 = {
@@ -50,11 +70,11 @@ export default class Connections extends Component {
                 }
               } else {
                 p1 = {
-                  x: src.left,
+                  x: src.left - 12.5,
                   y: src.top + 12.5
                 }
                 p2 = {
-                  x: tgt.left,
+                  x: tgt.left + 12.5,
                   y: tgt.top + 12.5
                 }
                 c1 = {
@@ -68,11 +88,11 @@ export default class Connections extends Component {
               }
 
               let pathStr = `M${p1.x},${p1.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${p2.x},${p2.y}`
-              elm = <path
+              elm = <AnimatedPath
                 key={'p' + src.left + '-' + src.top + '-' + idx}
                 d={pathStr}
                 fill={'node'}
-                stroke={'#3d3d3d'}
+                stroke={LINE_COLOR}
                 strokeWidth={2}
               />
             }

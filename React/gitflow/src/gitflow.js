@@ -1,12 +1,13 @@
 import React, { Component } from 'react'
 import ReactDOM from 'react-dom'
 import styled from 'styled-components'
-import { ButtonIcon, fallDownAnimation } from './global-style'
-import { release } from 'os'
+import { ButtonIcon, fallDownAnimation, fadeIn } from './global-style'
 import GoeyFilter from './goey-filter'
 import Connections from './connections'
 
 const GitFlowElm = styled.div`
+  max-width: 600px;
+  margin: 0 auto;
 `
 
 const ProjectElm = styled.div`
@@ -15,6 +16,9 @@ const ProjectElm = styled.div`
   grid-template-columns: 1fr;
   grid-template-rows: 90px 1fr;
   margin-top: 20px;
+  background: linear-gradient(135deg, rgba(34, 52, 122, 1) 0%, rgba(23, 35, 82, 1) 100%);
+  border-radius: 5px;
+  box-shadow: 0 4px 10px #9d9d9d;
 `
 const GridColumn = styled.div`
   position: relative;
@@ -25,13 +29,13 @@ const GridColumn = styled.div`
 const BranchHeader = styled.div`
   max-width: 90px;
   padding: 5px;
-  background-color: #fafafa;
+  background-color: #131d45;
   text-align: center;
   z-index: 1;
-
-  &:nth-child(even) {
-      background-color: #f7f7f7;
-  }
+  border-right: 1px solid #1b295f;
+  color: #f0f0f0;
+  margin-bottom: 10px;
+  animation: ${fadeIn} .5s ease-in;
 `
 
 const BranchActions = styled.div`
@@ -40,6 +44,7 @@ const BranchActions = styled.div`
   margin-top: 10px;
   justify-items: center;
   height: 24px;
+  opacity: .6;
 `
 
 const BranchName = styled.h4`
@@ -52,21 +57,13 @@ const BranchName = styled.h4`
 
 const Commits = styled.ol`
   position: relative;
-  min-height: 500px;
+  min-height: 800px;
+  heigth: ${p => p.height || '500px'};
   filter: url('#goo');
-  z-index: 20;
+  z-index: 40;
+  border-right: 1px solid #1b295f;
   
-  &:before {
-    position: absolute;
-    display: none;
-    content: '';
-    height: 100%;
-    border: 1px dashed ${p => p.color || '#000'};
-    left: 50%;
-    top: 0;
-    transform: translateX(-50%);
-    z-index: 0;
-  }
+  transition: opacity .5s;
 `
 const Commit = styled.li`
   position: absolute;
@@ -77,10 +74,17 @@ const Commit = styled.li`
   border-radius: 50%;
   transform: translate(-50%, -45px);
   background-color: ${p => p.color || '#9d9d9d'};
-  border: 2px solid #333;
+  border: 1px solid #fff;
+  box-shadow: 0 0 20px #f0f0f0;
   animation: ${fallDownAnimation} cubic-bezier(0.770, 0.000, 0.175, 1.000) 1s;
   animation-fill-mode: forwards;
-  z-index: 20;
+  z-index: 40;
+  transition: all .2s;
+  &.merged {
+    background-color: #fff;
+    box-shadow: none;
+    opacity: .5;
+  }
 `
 
 const ConnectionsContainer = styled.div`
@@ -89,7 +93,7 @@ const ConnectionsContainer = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 10;
+  z-index: 30;
 `
 
 class GitFlow extends Component {
@@ -126,6 +130,8 @@ class GitFlow extends Component {
       const tgtPosition = this.commitPositions[commit.id]
       return (parents || []).map(p => {
         return {
+          srcCommitID: p,
+          tgtCommitID: commit.id,
           src: this.commitPositions[p],
           tgt: tgtPosition
         }
@@ -135,11 +141,28 @@ class GitFlow extends Component {
     ReactDOM.render(<Connections paths={paths}/>, this.connectionsContainer)
   }
 
+  deleteBranch = (branchID) => {
+    const { commits } = this.props.project
+    const commitsToDelete = commits.filter(c => c.branch === branchID).map(c => c.id)
+    commitsToDelete.forEach(c => {
+      delete this.commitPositions[c.id]
+    })
+    this.props.onDeleteBranch(branchID)
+  }
+
   renderCommitButton = (branch) => {
     return (
       <ButtonIcon
         onClick={this.props.onCommit.bind(this, branch.id, 0)}
-      >+</ButtonIcon>
+      >C</ButtonIcon>
+    )
+  }
+
+  renderDeleteButton = (branch) => {
+    return (
+      <BranchActions count={1}>
+        <ButtonIcon onClick={this.deleteBranch.bind(this, branch.id)}>X</ButtonIcon>
+      </BranchActions>
     )
   }
 
@@ -159,33 +182,54 @@ class GitFlow extends Component {
   }
 
   renderFeatureBranchHeader = (branch) => {
-    return (
-      <BranchHeader key={branch.id}>
-        <BranchName>{branch.name}</BranchName>
+    let actionsElm = null
+    if (branch.merged) {
+      actionsElm = this.renderDeleteButton(branch)
+    } else {
+      actionsElm = (
         <BranchActions
           count={2}
         >
-          {this.renderCommitButton(branch)}
           <ButtonIcon
             onClick={this.props.onMerge.bind(this, branch.id, undefined)}
           >M</ButtonIcon>
+          {this.renderCommitButton(branch)}
         </BranchActions>
+      )
+    }
+    
+    return (
+      <BranchHeader
+        key={branch.id}
+      >
+        <BranchName>{branch.name}</BranchName>
+        {actionsElm}
       </BranchHeader>
     )
   }
 
   renderReleaseBranchHeader = (branch) => {
-    return (
-      <BranchHeader key={branch.id}>
-        <BranchName>{branch.name}</BranchName>
+    let actionsElm = null
+    if (branch.merged) {
+      actionsElm = this.renderDeleteButton(branch)
+    } else {
+      actionsElm = (
         <BranchActions
           count={2}
         >
           {this.renderCommitButton(branch)}
           <ButtonIcon
             onClick={this.props.onRelease.bind(this, branch.id, undefined)}
-          >R</ButtonIcon>
+          >M</ButtonIcon>
         </BranchActions>
+      )
+    }
+    return (
+      <BranchHeader
+        key={branch.id}
+      >
+        <BranchName>{branch.name}</BranchName>
+        {actionsElm}
       </BranchHeader>
     )
   }
@@ -226,12 +270,15 @@ class GitFlow extends Component {
 
     return (
       <Commits
+        className={branch.merged ? 'merged' : ''}
         color={branch.color}
         key={'branch-' + branch.id}
+        height={(branchCommits.length * 45) + 'px'}
       >
         {
           branchCommits.map(commit => {
             return <Commit
+              className={branch.merged ? 'merged' : ''}
               innerRef={this.storeCommitPosition.bind(this, commit.id, branchIndex)}
               key={'commit-' + commit.id}
               color={branch.color}
@@ -257,8 +304,8 @@ class GitFlow extends Component {
       <GridColumn
         count={noOfBranches}
       >
+        <ConnectionsContainer innerRef={this.cacheConnectionsContainer}/>      
         {branches.map((branch, index)=> this.renderBranchCommit(branch, index))}
-        <ConnectionsContainer innerRef={this.cacheConnectionsContainer}/>
       </GridColumn>
     )
   }
