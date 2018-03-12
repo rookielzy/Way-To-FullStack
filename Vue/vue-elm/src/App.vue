@@ -5,6 +5,13 @@
 </template>
 
 <script>
+import fetch from './config/fetch'
+fetch('GET', 'https://api.github.com/search/repositories', {
+  q: 'vue',
+  sort: 'stars',
+  order: 'desc'
+})
+
 export default {
   name: 'App'
 }
