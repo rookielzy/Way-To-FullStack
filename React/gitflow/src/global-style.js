@@ -79,6 +79,13 @@ export const ButtonIcon = styled.button`
   border: 1px solid #2196f3;
   color: #2196f3;
   border-radius: 50%;
+  transition: all .2s;
+
+  &:hover {
+    background-color: #2196f3;
+    color: #fff;
+    transform: scale(1.1);
+  }
 `
 
 export const FlowActions = styled.div`

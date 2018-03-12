@@ -105,6 +105,40 @@ class App extends Component {
 
   }
 
+  handleNewHotFix = () => {
+    let { branches, commits } = this.state.project
+    let hotFixBranches = branches.filter(b => b.hotfixBranches)
+    let hotFixBranchName = 'hot ' + ((hotFixBranches || []).length + 1)
+    let masterCommits = commits.filter(c => c.branch === masterID)
+    const lastMasterCommit = masterCommits[masterCommits.length - 1]
+    let hotFixOffset = lastMasterCommit.gridIndex + 1
+
+    let newBranch = {
+      id: shortid.generate(),
+      name: hotFixBranchName,
+      hotFixBranch: true,
+      canCommit: true,
+      color: '#ff1744'
+    }
+
+    let newCommit = {
+      id: shortid.generate(),
+      branch: newBranch.id,
+      gridIndex: hotFixOffset,
+      parents: [lastMasterCommit.id]
+    }
+
+    commits.push(newCommit)
+    branches.push(newBranch)
+
+    this.setState({
+      project: {
+        branches,
+        commits
+      }
+    })
+  }
+
   handleNewRelease = () => {
     let { branches, commits } = this.state.project
     let releaseBranches = branches.filter(b => b.releaseBranch)
@@ -230,6 +264,7 @@ class App extends Component {
           onCommit={this.handleCommit}
           onNewFeature={this.handleNewFeature}
           onNewRelease={this.handleNewRelease}
+          onNewHotFix={this.handleNewHotFix}
         />
       </AppElm>
     )
