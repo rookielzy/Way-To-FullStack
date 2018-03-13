@@ -15,6 +15,10 @@ export default (type = 'GET', url = '', data = {}) => {
         url += `${key}=${data[key]}&`
       })
       url = url.slice(0, -1)
+    } else {
+      Object.defineProperty(requestObj, 'body', {
+        value: JSON.stringify(data)
+      })
     }
 
     fetch(url, requestObj).then((res) => {
