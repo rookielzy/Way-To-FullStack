@@ -5,17 +5,6 @@
 </template>
 
 <script>
-import fetch from './config/fetch'
-fetch('GET', 'https://api.github.com/search/repositories', {
-  q: 'vue',
-  sort: 'stars',
-  order: 'desc'
-})
-
-fetch('GET', 'https://api.opendota.com/api/live')
-
-fetch('POST', 'https://api.opendota.com/api/request/match_id=3776051585')
-
 export default {
   name: 'App'
 }
