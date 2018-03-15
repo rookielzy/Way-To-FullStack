@@ -11,6 +11,9 @@ export default {
   name: 'City',
   data () {
     return {}
+  },
+  created () {
+    this.$store.dispatch('getData2')
   }
 }
 </script>
