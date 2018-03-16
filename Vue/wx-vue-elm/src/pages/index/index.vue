@@ -1,10 +1,12 @@
 <template>
   <div class="container">
-
+    {{ userInfo.nickName }}
   </div>
 </template>
 
 <script>
+import { restaurants } from '@/api/getData'
+
 export default {
   data () {
     return {
@@ -14,7 +16,7 @@ export default {
   },
 
   methods: {
-    
+
   },
 
   created () {
@@ -27,6 +29,11 @@ export default {
           }
         })
       }
+    })
+
+    restaurants().then(res => {
+      let data = res
+      console.log(data)
     })
   }
 }
