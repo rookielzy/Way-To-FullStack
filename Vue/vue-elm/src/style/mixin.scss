@@ -1,0 +1,7 @@
+$blue: #3190e8;
+$borderColor: #e4e4e4;
+@mixin backImg($url) {
+  background-image: url($url);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}

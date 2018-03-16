@@ -3,8 +3,10 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import jetui from './components/index'
 
 Vue.config.productionTip = false
+Vue.use(jetui)
 
 /* eslint-disable no-new */
 new Vue({
