@@ -1,18 +1,20 @@
 <template>
   <div class="container">
-    {{ userInfo.nickName }}
+    <headTop></headTop>  
   </div>
 </template>
 
 <script>
 import { restaurants } from '@/api/getData'
+import headTop from '@/components/header/head'
 
 export default {
+  components: {
+    headTop
+  },
+
   data () {
-    return {
-      motto: 'Hello World',
-      userInfo: {}
-    }
+    return {}
   },
 
   methods: {

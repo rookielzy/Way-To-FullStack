@@ -1,4 +1,6 @@
 <script>
+import '@/style/common.css'
+
 export default {
   created () {
     // 调用API从本地缓存中获取数据
@@ -13,12 +15,12 @@ export default {
 
 <style>
 .container {
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 200rpx 0;
   box-sizing: border-box;
 }
 /* this rule will be remove */
