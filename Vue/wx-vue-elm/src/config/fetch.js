@@ -3,7 +3,9 @@ import { baseUrl } from './env'
 // 微信网络请求接口
 export default (type = 'GET', url = '', data = {}) => {
   const method = type.toUpperCase()
-  url = baseUrl + url
+  if (!url.includes('http')) {
+    url = baseUrl + url
+  }
   return new Promise((resolve, reject) => {
     wx.request({
       url,

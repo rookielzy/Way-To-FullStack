@@ -1,5 +1,7 @@
 let baseUrl
 let qqmapkey = '' // 自行填入申请的KEY
+let baidukey = ''
+let baiduurl = 'http://api.map.baidu.com/telematics/v3/weather'
 
 if (process.env.NODE_ENV === 'development') {
   baseUrl = 'https://easy-mock.com/mock/58ff34155e43ae5dbea5fada/elm-test/'
@@ -9,5 +11,7 @@ if (process.env.NODE_ENV === 'development') {
 
 export {
   baseUrl,
-  qqmapkey
+  qqmapkey,
+  baidukey,
+  baiduurl
 }
