@@ -1,7 +1,7 @@
 <template>
   <header>
     <div class="row">
-      <div id="address">{{address}}</div>
+      <div id="address" @click="changeAddress">{{address}}</div>
       <div id="weather">sunny</div>
     </div>
     <div class="row"></div>
@@ -33,6 +33,14 @@ export default {
         })
       }
     })
+  },
+  methods: {
+    changeAddress () {
+      console.log('change address')
+      wx.navigateTo({
+        url: '/pages/address/address'
+      })
+    }
   }
 }
 </script>
